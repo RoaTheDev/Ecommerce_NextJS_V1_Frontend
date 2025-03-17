@@ -73,6 +73,7 @@ const Header: React.FC<HeaderProps> = ({setCartOpen}) => {
                         <a href="#" className="block hover:text-[#F6F2E9] transition-colors">Shop</a>
                         <a href="#" className="block hover:text-[#F6F2E9] transition-colors">Collections</a>
                         <a href="#" className="block hover:text-[#F6F2E9] transition-colors">About</a>
+
                     </nav>
                 )}
             </div>

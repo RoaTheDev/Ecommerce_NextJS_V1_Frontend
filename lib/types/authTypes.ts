@@ -52,3 +52,31 @@ export interface AuthProviderProps {
 export interface ProtectedRouteProps {
     children: React.ReactNode;
 }
+
+export interface ForgotPasswordRequest {
+    email: string;
+}
+
+export interface ForgotPasswordResponse {
+    message: string;
+    expiresAt: string;
+}
+
+export interface ResetPasswordRequest {
+    password: string;
+    confirmPassword: string;
+}
+
+export interface ResetPasswordResponse {
+    message: string;
+}
+
+export interface LogoutResponse {
+    message: string;
+}
+
+export interface CurrentUserResponse {
+    customerId: number;
+    displayName: string;
+    email: string;
+}
