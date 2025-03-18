@@ -124,11 +124,35 @@
     }
 
     :root {
+        /* Application Color patterns*/
         --fauna-primary: 148 58% 55%; /* #5CBD7B */
         --fauna-light: 138 49% 70%; /* #90D4A3 */
         --fauna-secondary: 32 32% 41%; /* #8B6E47 */
         --fauna-background: 42 46% 94%; /* #F6F2E9 */
         --fauna-deep: 149 41% 39%; /* #3A8C5C */
+
+
+        /* ShadCN requires these values */
+        --background: 0 0% 100%;
+        --foreground: 224 71.4% 4.1%;
+        --card: 0 0% 100%;
+        --card-foreground: 224 71.4% 4.1%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 224 71.4% 4.1%;
+        --primary: var(--fauna-primary);
+        --primary-foreground: 210 20% 98%;
+        --secondary: var(--fauna-secondary);
+        --secondary-foreground: 220.9 39.3% 11%;
+        --muted: 220 14.3% 95.9%;
+        --muted-foreground: 220 8.9% 46.1%;
+        --accent: 220 14.3% 95.9%;
+        --accent-foreground: 220.9 39.3% 11%;
+        --destructive: 0 84.2% 60.2%;
+        --destructive-foreground: 210 20% 98%;
+        --border: 220 13% 91%;
+        --input: 220 13% 91%;
+        --ring: var(--fauna-primary);
+        --radius: 0.5rem;
     }
 
     body {

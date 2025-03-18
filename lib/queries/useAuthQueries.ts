@@ -5,7 +5,6 @@ import {
     forgotPassword,
     googleLogin,
     loginUser,
-    logout,
     registerUser,
     resetPassword,
     verifyEmail
@@ -14,7 +13,6 @@ import {useAuthStore} from '@/lib/stores/useAuthStore';
 import {
     ForgotPasswordResponse,
     LoginCredentials,
-    LogoutResponse,
     ResetPasswordRequest,
     ResetPasswordResponse,
     UserData,
@@ -72,7 +70,7 @@ export const useGoogleLogin = (): UseMutationResult<UserResponse, Error, { idTok
         mutationFn: googleLogin,
         onSuccess: (data) => {
             login(data);
-            router.push('/admin/dashboard');
+            router.push('/');
         },
         onError: () => {
             toast.error('Google login failed.');
@@ -114,18 +112,17 @@ export const useResetPassword = (token: string): UseMutationResult<ResetPassword
     });
 };
 
-export const useLogout = (): UseMutationResult<LogoutResponse, Error, void> => {
+export const useLogout = (): UseMutationResult<void, Error, void> => {
     const router = useRouter();
     const logoutStore = useAuthStore(state => state.logout);
+
     return useMutation({
-        mutationFn: logout,
-        onSuccess: async () => {
-            await logoutStore();
+        mutationFn: logoutStore,
+        onSuccess: () => {
             router.push('/auth/login');
             toast.success('You have been logged out successfully');
         },
-        onError: async () => {
-            await logoutStore();
+        onError: () => {
             router.push('/auth/login');
         }
     });

@@ -2,18 +2,14 @@ import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {jwtDecode} from 'jwt-decode';
 
-const protectedPaths = ['/admin/dashboard', '/account/profile', '/account/settings'];
-
+const protectedPaths = ['/admin/dashboard', '/user/profile', '/user/settings'];
 const authPaths = ['/auth/login', '/auth/register', '/auth/verify-email'];
 
 export function middleware(request: NextRequest) {
-    const currentUser = request.cookies.get('auth-storage')?.value;
+    const currentUser = request.cookies.get('AuthToken')?.value;
 
     const isAdminPath = request.nextUrl.pathname.startsWith('/admin');
-
-    const isProtectedPath =
-        protectedPaths.some(path => request.nextUrl.pathname.startsWith(path)) || isAdminPath;
-
+    const isProtectedPath = protectedPaths.some(path => request.nextUrl.pathname.startsWith(path)) || isAdminPath;
     const isAuthPath = authPaths.some(path => request.nextUrl.pathname.startsWith(path));
 
     let isAuthenticated = false;
@@ -21,17 +17,13 @@ export function middleware(request: NextRequest) {
 
     if (currentUser) {
         try {
-            const parsedUser = JSON.parse(decodeURIComponent(currentUser));
-            if (parsedUser?.state?.currentUser?.token?.token) {
-                const token = parsedUser.state.currentUser.token.token;
-                const decodedToken = jwtDecode<{ exp: number; role: string }>(token);
-                const currentTime = Date.now() / 1000;
-
-                isAuthenticated = decodedToken.exp > currentTime;
-                userRole = decodedToken.role;
-            }
+            const decodedToken = jwtDecode<{ exp: number; role: string }>(currentUser);
+            const currentTime = Date.now() / 1000;
+            isAuthenticated = decodedToken.exp > currentTime;
+            userRole = decodedToken.role;
+            console.log(userRole)
         } catch (error) {
-            console.error('Error parsing auth token:', error);
+            console.error('Error decoding auth token:', error);
         }
     }
 
@@ -39,13 +31,14 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/auth/login', request.url));
     }
 
-    if (isAdminPath && userRole !== 'admin') {
-        return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    if (isAdminPath && isAuthenticated && userRole !== 'Admin') {
+        return NextResponse.redirect(new URL('/', request.url));
     }
 
     if (isAuthPath && isAuthenticated) {
-        return NextResponse.redirect(new URL('/', request.url));
+        return NextResponse.redirect(new URL(userRole === 'Admin' ? '/admin/dashboard' : '/', request.url));
     }
+
 
     return NextResponse.next();
 }
