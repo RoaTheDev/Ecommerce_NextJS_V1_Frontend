@@ -2,7 +2,7 @@
 
 import React, {useEffect, useState} from 'react';
 import {useProducts} from '@/lib/queries/useProductQueries';
-import {ProductByIdResponse} from '@/lib/types/productTypes';
+import {PaginatedProduct} from '@/lib/types/productTypes';
 import {Skeleton} from '@/components/ui/skeleton';
 import {useRouter} from 'next/navigation';
 import Image from 'next/image';
@@ -10,7 +10,7 @@ import Image from 'next/image';
 const FeaturedProducts: React.FC = () => {
     const router = useRouter();
     const {data, isLoading} = useProducts(0, 4);
-    const [featuredProducts, setFeaturedProducts] = useState<ProductByIdResponse[]>([]);
+    const [featuredProducts, setFeaturedProducts] = useState<PaginatedProduct[]>([]);
 
     useEffect(() => {
         if (data?.products) {
@@ -18,11 +18,11 @@ const FeaturedProducts: React.FC = () => {
         }
     }, [data]);
 
-    const handleViewProduct = (productId: bigint) => {
+    const handleViewProduct = (productId: number) => {
         router.push(`/product/${productId}`);
     };
 
-    const handleAddToCart = (e: React.MouseEvent, product: ProductByIdResponse) => {
+    const handleAddToCart = (e: React.MouseEvent, product: PaginatedProduct) => {
         e.stopPropagation();
         console.log(`Adding product ${product.productId} to cart`);
     };
@@ -33,22 +33,22 @@ const FeaturedProducts: React.FC = () => {
 
     const BASE_URL = "http://localhost:5297"; // Replace with your actual backend URL
 
-    const getImageUrl = (imagePath: string) => {
+    const getImageUrl = (imagePath: string | null) => {
+        if (!imagePath) return '/Fauna.png';
+
         if (!imagePath.startsWith('/')) {
             imagePath = `/${imagePath}`;
         }
         return `${BASE_URL}${imagePath}`;
     };
 
-    const renderProductCard = (
-        product: ProductByIdResponse,
-        imageUrl: string,
-        imageAlt: string,
-        key: string
-    ) => {
+    const renderProductCard = (product: PaginatedProduct) => {
+        const imageUrl = getImageUrl(product.imageUrls);
+        const imageAlt = product.productName;
+
         return (
             <div
-                key={key}
+                key={product.productId.toString()}
                 className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition-shadow cursor-pointer"
                 onClick={() => handleViewProduct(product.productId)}
             >
@@ -132,29 +132,7 @@ const FeaturedProducts: React.FC = () => {
             <div className="container mx-auto px-4">
                 <h2 className="text-3xl font-bold mb-12 text-center text-[#212121]">Featured Products</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {featuredProducts.flatMap((product) => {
-                        // If product has no images, create a single card with the default image
-                        if (!product.imageUrls || product.imageUrls.length === 0) {
-                            return [
-                                renderProductCard(
-                                    product,
-                                    "/Fauna.png",
-                                    product.productName,
-                                    `${product.productId.toString()}-default`
-                                )
-                            ];
-                        }
-
-                        // Create a card for each image URL
-                        return product.imageUrls.map((imageUrl, imgIndex) =>
-                            renderProductCard(
-                                product,
-                                getImageUrl(imageUrl),
-                                `${product.productName} - Image ${imgIndex + 1}`,
-                                `${product.productId.toString()}-${imgIndex}`
-                            )
-                        );
-                    })}
+                    {featuredProducts.map((product) => renderProductCard(product))}
                 </div>
                 <div className="mt-12 text-center">
                     <button

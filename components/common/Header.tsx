@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import Link from "next/link";
 
 interface HeaderProps {
     setCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -23,10 +24,10 @@ const Header: React.FC<HeaderProps> = ({setCartOpen}) => {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex space-x-8">
-                        <a href="#" className="hover:text-[#F6F2E9] transition-colors">Home</a>
-                        <a href="#" className="hover:text-[#F6F2E9] transition-colors">Shop</a>
-                        <a href="#" className="hover:text-[#F6F2E9] transition-colors">Collections</a>
-                        <a href="#" className="hover:text-[#F6F2E9] transition-colors">About</a>
+                        <Link href="/" className="hover:text-[#F6F2E9] transition-colors">Home</Link>
+                        <Link href="/product" className="hover:text-[#F6F2E9] transition-colors">Shop</Link>
+                        <Link href="#" className="hover:text-[#F6F2E9] transition-colors">Collections</Link>
+                        <Link href="#" className="hover:text-[#F6F2E9] transition-colors">About</Link>
                     </nav>
 
                     {/* Icons */}
@@ -69,10 +70,10 @@ const Header: React.FC<HeaderProps> = ({setCartOpen}) => {
                 {/* Mobile Navigation */}
                 {mobileMenuOpen && (
                     <nav className="md:hidden pt-4 pb-3 space-y-2">
-                        <a href="#" className="block hover:text-[#F6F2E9] transition-colors">Home</a>
-                        <a href="#" className="block hover:text-[#F6F2E9] transition-colors">Shop</a>
-                        <a href="#" className="block hover:text-[#F6F2E9] transition-colors">Collections</a>
-                        <a href="#" className="block hover:text-[#F6F2E9] transition-colors">About</a>
+                        <Link href="/" className="block hover:text-[#F6F2E9] transition-colors">Home</Link>
+                        <Link href="/product" className="block hover:text-[#F6F2E9] transition-colors">Shop</Link>
+                        <Link href="#" className="block hover:text-[#F6F2E9] transition-colors">Collections</Link>
+                        <Link href="#" className="block hover:text-[#F6F2E9] transition-colors">About</Link>
 
                     </nav>
                 )}

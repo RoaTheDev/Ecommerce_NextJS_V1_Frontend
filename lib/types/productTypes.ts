@@ -42,9 +42,13 @@ export interface ProductByIdResponse extends ProductResponse {
     imageUrls: string[],
     tags: string[]
 }
-
+export interface PaginatedProduct extends ProductResponse {
+    categoryName: string,
+    imageUrls: string,
+    tags: string[]
+}
 export interface PaginatedProductResponse {
-    products: ProductByIdResponse[],
+    products: PaginatedProduct[],
     nextCursor: number,
     pageSize: number
 }
