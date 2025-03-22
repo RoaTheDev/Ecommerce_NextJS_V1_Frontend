@@ -20,6 +20,7 @@ import {
     VerifyEmailParams
 } from '@/lib/types/authTypes';
 import toast from "react-hot-toast";
+import {jwtDecode} from "jwt-decode";
 
 export const useRegister = (): UseMutationResult<{ session: string }, Error, UserData> => {
     const router = useRouter();
@@ -54,13 +55,17 @@ export const useLogin = (): UseMutationResult<UserResponse, Error, LoginCredenti
         mutationFn: loginUser,
         onSuccess: (data) => {
             login(data);
-            router.push('/');
+            const decodedToken = jwtDecode<{ exp: number; role: string }>(data.token.token);
+            const role = decodedToken.role;
+            return role === 'Admin' ? router.push('/admin/dashboard') : router.push('/');
         },
         onError: () => {
             toast.error('Login failed.');
         }
     });
 };
+
+
 
 export const useGoogleLogin = (): UseMutationResult<UserResponse, Error, { idToken: string }> => {
     const router = useRouter();
@@ -70,7 +75,9 @@ export const useGoogleLogin = (): UseMutationResult<UserResponse, Error, { idTok
         mutationFn: googleLogin,
         onSuccess: (data) => {
             login(data);
-            router.push('/');
+            const decodedToken = jwtDecode<{ exp: number; role: string }>(data.token.token);
+            const role = decodedToken.role;
+            return role === 'Admin' ? router.push('/admin/dashboard') : router.push('/');
         },
         onError: () => {
             toast.error('Google login failed.');

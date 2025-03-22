@@ -4,31 +4,31 @@ interface ProductRequest {
     price: number,
     quantity: number,
     discount: number,
-    categoryId: bigint
+    categoryId: number
 }
 
 export interface ProductCreateRequest extends ProductRequest {
-    createBy: bigint,
+    createBy: number,
     isAvailable?: boolean,
-    tagIds: bigint[]
+    tagIds: number[]
 }
 
 export interface ProductTagRemoveRequest {
-    tagIds: bigint[]
+    tagIds: number[]
 }
 
 export interface ProductUpdateRequest extends ProductRequest {
-    updateBy: bigint
+    updateBy: number
 }
 
 export interface ProductTagToAddRequest {
-    tagsIds: bigint[]
+    tagsIds: number[]
 }
 
 // read
 
 interface ProductResponse {
-    productId: bigint,
+    productId: number,
     productName: string,
     description: string,
     price: number,
@@ -50,29 +50,29 @@ export interface PaginatedProductResponse {
 }
 
 export interface ProductCreateResponse extends ProductResponse {
-    createBy: bigint,
+    createBy: number,
     createAt: string,
     isAvailable: boolean
 }
 
 export interface ProductImageChangeResponse {
-    productId: bigint,
-    imageId: bigint,
+    productId: number,
+    imageId: number,
     imageUrl: string
 }
 
 interface ImageResponse {
-    imageId: bigint,
+    imageId: number,
     imageUrl: string
 }
 
 export interface ProductImageResponse {
-    productId: bigint,
+    productId: number,
     images: ImageResponse[]
 }
 
 export interface ProductStatusChange {
-    productId: bigint,
+    productId: number,
     isAvailable: boolean
 }
 

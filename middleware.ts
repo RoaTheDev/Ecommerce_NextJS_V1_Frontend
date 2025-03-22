@@ -30,14 +30,13 @@ export function middleware(request: NextRequest) {
     if (isProtectedPath && !isAuthenticated) {
         return NextResponse.redirect(new URL('/auth/login', request.url));
     }
-
+    if (isAuthPath && isAuthenticated) {
+        return NextResponse.redirect(new URL(userRole === 'Admin' ? '/admin/dashboard' : '/', request.url));
+    }
     if (isAdminPath && isAuthenticated && userRole !== 'Admin') {
         return NextResponse.redirect(new URL('/', request.url));
     }
 
-    if (isAuthPath && isAuthenticated) {
-        return NextResponse.redirect(new URL(userRole === 'Admin' ? '/admin/dashboard' : '/', request.url));
-    }
 
 
     return NextResponse.next();

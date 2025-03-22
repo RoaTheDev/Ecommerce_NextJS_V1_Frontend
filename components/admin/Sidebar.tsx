@@ -7,7 +7,6 @@ import {
     Users, ShoppingBag, Tag, Layers, CreditCard,
     RefreshCcw, Package, Calendar, Home
 } from 'lucide-react';
-import LogoutConfirmation from "@/components/common/LogoutConfirmation"; // Import Logout Component
 
 const navItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: Home },
@@ -39,7 +38,7 @@ export function Sidebar() {
                 )}
                 <button
                     onClick={() => setCollapsed(!collapsed)}
-                    className="p-1 rounded-md hover:bg-[hsl(var(--fauna-secondary)/0.2)]"
+                    className="text-3xl p-1 rounded-md hover:bg-[hsl(var(--fauna-secondary)/0.2)]"
                 >
                     {collapsed ? "→" : "←"}
                 </button>
@@ -68,11 +67,6 @@ export function Sidebar() {
                         );
                     })}
                 </ul>
-
-                {/* Logout Button */}
-                <div className="p-2">
-                    <LogoutConfirmation />
-                </div>
             </nav>
         </aside>
     );
