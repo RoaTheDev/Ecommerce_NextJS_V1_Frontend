@@ -19,7 +19,7 @@ export default function ProductDetail() {
     const {data: product, isLoading, isError} = useProduct(productId);
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [quantity, setQuantity] = useState(1);
-
+    const baseUrl: string | undefined = process.env.NEXT_PUBLIC_IMAGE_URLS;
     useEffect(() => {
         if (product?.imageUrls) {
             if (Array.isArray(product.imageUrls) && product.imageUrls.length > 0) {
@@ -74,20 +74,20 @@ export default function ProductDetail() {
         <div className="container mx-auto px-4 py-8 bg-[hsl(var(--fauna-background))]">
             <Button
                 variant="ghost"
-                className="mb-6 text-[hsl(var(--fauna-deep))] hover:text-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-background))]"
+                className=" text-xl -mt-8  mb-3  text-[hsl(var(--fauna-deep))] hover:text-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-background))]"
                 onClick={handleBackClick}
             >
                 <ChevronLeft className="mr-2 h-4 w-4"/>
                 Back to Products
             </Button>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ">
                 <div className="space-y-4">
                     <div
                         className="aspect-square w-full max-h-[500px] sm:max-h-[600px] bg-white rounded-lg overflow-hidden border border-[hsl(var(--fauna-light)/30%)] relative">
                         {selectedImage ? (
                             <Image
-                                src={"http://localhost:5297/" + selectedImage}
+                                src={baseUrl!.concat(selectedImage)}
                                 alt={product.productName}
                                 fill
                                 quality={100}
@@ -118,7 +118,7 @@ export default function ProductDetail() {
                                 >
                                     <div className="relative w-full h-full">
                                         <Image
-                                            src={"http://localhost:5297/" + url}
+                                            src={baseUrl!.concat(url)}
                                             alt={`${product.productName} - image ${index + 1}`}
                                             fill
                                             quality={80}

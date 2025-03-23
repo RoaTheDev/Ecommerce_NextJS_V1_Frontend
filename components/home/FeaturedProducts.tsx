@@ -31,13 +31,13 @@ const FeaturedProducts: React.FC = () => {
         router.push('/product');
     };
 
-    const BASE_URL = "http://localhost:5297"; // Replace with your actual backend URL
+    const BASE_URL = process.env.NEXT_PUBLIC_IMAGE_URLS;
 
     const getImageUrl = (imagePath: string | null) => {
         if (!imagePath) return '/Fauna.png';
 
         if (!imagePath.startsWith('/')) {
-            imagePath = `/${imagePath}`;
+            imagePath = `${imagePath}`;
         }
         return `${BASE_URL}${imagePath}`;
     };

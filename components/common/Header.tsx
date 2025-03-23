@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import Link from "next/link";
+import {usePathname} from "next/navigation";
 
 interface HeaderProps {
     setCartOpen: React.Dispatch<React.SetStateAction<boolean>>;
@@ -7,6 +8,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({setCartOpen}) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const pathname = usePathname();
 
     return (
         <header className="bg-[#5CBD7B] text-white shadow-md">
@@ -24,10 +26,50 @@ const Header: React.FC<HeaderProps> = ({setCartOpen}) => {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex space-x-8">
-                        <Link href="/" className="hover:text-[#F6F2E9] transition-colors">Home</Link>
-                        <Link href="/product" className="hover:text-[#F6F2E9] transition-colors">Shop</Link>
-                        <Link href="#" className="hover:text-[#F6F2E9] transition-colors">Collections</Link>
-                        <Link href="#" className="hover:text-[#F6F2E9] transition-colors">About</Link>
+                        <Link
+                            href="/"
+                            className={`hover:text-[#F6F2E9] transition-colors relative ${
+                                pathname === '/' ? 'font-bold' : ''
+                            }`}
+                        >
+                            Home
+                            {pathname === '/' && (
+                                <div className="absolute h-1 w-full bg-[#F6F2E9] bottom-0 left-0 rounded-t-md -mb-4"/>
+                            )}
+                        </Link>
+                        <Link
+                            href="/product"
+                            className={`hover:text-[#F6F2E9] transition-colors relative ${
+                                pathname === '/product' ? 'font-bold' : ''
+                            }`}
+                        >
+                            Shop
+                            {pathname === '/product' && (
+                                <div className="absolute h-1 w-full bg-[#F6F2E9] bottom-0 left-0 rounded-t-md -mb-4"/>
+                            )}
+                        </Link>
+                        <Link
+                            href="/collection"
+                            className={`hover:text-[#F6F2E9] transition-colors relative ${
+                                pathname === '/collection' ? 'font-bold' : ''
+                            }`}
+                        >
+                            Collections
+                            {pathname === '/collection' && (
+                                <div className="absolute h-1 w-full bg-[#F6F2E9] bottom-0 left-0 rounded-t-md -mb-4"/>
+                            )}
+                        </Link>
+                        <Link
+                            href="/about"
+                            className={`hover:text-[#F6F2E9] transition-colors relative ${
+                                pathname === '/about' ? 'font-bold' : ''
+                            }`}
+                        >
+                            About
+                            {pathname === '/about' && (
+                                <div className="absolute h-1 w-full bg-[#F6F2E9] bottom-0 left-0 rounded-t-md -mb-4"/>
+                            )}
+                        </Link>
                     </nav>
 
                     {/* Icons */}
@@ -70,11 +112,38 @@ const Header: React.FC<HeaderProps> = ({setCartOpen}) => {
                 {/* Mobile Navigation */}
                 {mobileMenuOpen && (
                     <nav className="md:hidden pt-4 pb-3 space-y-2">
-                        <Link href="/" className="block hover:text-[#F6F2E9] transition-colors">Home</Link>
-                        <Link href="/product" className="block hover:text-[#F6F2E9] transition-colors">Shop</Link>
-                        <Link href="#" className="block hover:text-[#F6F2E9] transition-colors">Collections</Link>
-                        <Link href="#" className="block hover:text-[#F6F2E9] transition-colors">About</Link>
-
+                        <Link
+                            href="/"
+                            className={`block hover:text-[#F6F2E9] transition-colors ${
+                                pathname === '/' ? 'font-bold border-l-4 border-[#F6F2E9] pl-2' : ''
+                            }`}
+                        >
+                            Home
+                        </Link>
+                        <Link
+                            href="/product"
+                            className={`block hover:text-[#F6F2E9] transition-colors ${
+                                pathname === '/product' ? 'font-bold border-l-4 border-[#F6F2E9] pl-2' : ''
+                            }`}
+                        >
+                            Shop
+                        </Link>
+                        <Link
+                            href="/collection"
+                            className={`block hover:text-[#F6F2E9] transition-colors ${
+                                pathname === '/collections' ? 'font-bold border-l-4 border-[#F6F2E9] pl-2' : ''
+                            }`}
+                        >
+                            Collections
+                        </Link>
+                        <Link
+                            href="/about"
+                            className={`block hover:text-[#F6F2E9] transition-colors ${
+                                pathname === '/about' ? 'font-bold border-l-4 border-[#F6F2E9] pl-2' : ''
+                            }`}
+                        >
+                            About
+                        </Link>
                     </nav>
                 )}
             </div>
