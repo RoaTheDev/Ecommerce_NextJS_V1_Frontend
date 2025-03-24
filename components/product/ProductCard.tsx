@@ -13,7 +13,7 @@ export function ProductCard({product}: { product: PaginatedProduct }) {
     return (
         <Link href={`/product/${product.productId}`}>
             <Card
-                className="h-full transition-all duration-300 hover:shadow-lg overflow-hidden border border-[hsl(var(--fauna-light)/30%)] hover:border-[hsl(var(--fauna-primary))]">
+                className="h-full transition-all duration-300 hover:shadow-lg overflow-hidden border border-[hsl(var(--fauna-light)/75%)] hover:border-[hsl(var(--fauna-primary))]">
                 <div className="aspect-square relative overflow-hidden bg-[hsl(var(--fauna-background)/50%)] p-0 -mt-6">
                     {product.imageUrls ? (
                         <Image

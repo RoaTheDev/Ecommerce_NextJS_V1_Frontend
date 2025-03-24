@@ -2,7 +2,7 @@ import type {NextRequest} from 'next/server';
 import {NextResponse} from 'next/server';
 import {jwtDecode} from 'jwt-decode';
 
-const protectedPaths = ['/admin/dashboard', '/user/profile', '/user/settings'];
+const protectedPaths = ['/admin/dashboard', '/account/profile', '/account/settings'];
 const authPaths = ['/auth/login', '/auth/register', '/auth/verify-email'];
 
 export function middleware(request: NextRequest) {
