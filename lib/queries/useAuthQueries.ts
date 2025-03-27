@@ -1,18 +1,21 @@
-import {useMutation, UseMutationResult, useQuery, UseQueryResult} from '@tanstack/react-query';
+import {useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult} from '@tanstack/react-query';
 import {useRouter} from 'next/navigation';
 import {
+    changePassword,
+    changeProfileImage,
     fetchCustomerProfile,
-    forgotPassword,
-    googleLogin,
+    forgotPassword, getLinkedProviders,
+    googleLogin, linkGoogleAccount,
     loginUser,
     registerUser,
-    resetPassword,
+    resetPassword, unlinkAuthProvider, updateCustomerInfo,
     verifyEmail
-} from '@/lib/api/authApi';
+} from '@/lib/data/authApi';
 import {useAuthStore} from '@/lib/stores/useAuthStore';
 import {
+    AuthProviderResponse, CustomerUpdateRequest, CustomerUpdateResponse,
     ForgotPasswordResponse,
-    LoginCredentials,
+    LoginCredentials, PasswordChangeRequest,
     ResetPasswordRequest,
     ResetPasswordResponse,
     UserData,
@@ -131,6 +134,85 @@ export const useLogout = (): UseMutationResult<void, Error, void> => {
         },
         onError: () => {
             router.push('/auth/login');
+        }
+    });
+};
+
+export const useChangePassword = (id: string): UseMutationResult<{ message: string }, Error, PasswordChangeRequest> => {
+    return useMutation({
+        mutationFn: (data: PasswordChangeRequest) => changePassword(id, data),
+        onSuccess: () => {
+            toast.success('Password changed successfully');
+        },
+        onError: () => {
+            toast.error('Failed to change password');
+        }
+    });
+};
+
+export const useChangeProfileImage = (id: string): UseMutationResult<{ message: string }, Error, File> => {
+    return useMutation({
+        mutationFn: (file: File) => changeProfileImage(id, file),
+        onSuccess: () => {
+            toast.success('Profile image updated successfully');
+        },
+        onError: () => {
+            toast.error('Failed to update profile image');
+        }
+    });
+};
+
+export const useLinkGoogleAccount = (): UseMutationResult<{ message: string }, Error, string> => {
+    return useMutation({
+        mutationFn: (idToken: string) => linkGoogleAccount(idToken),
+        onSuccess: () => {
+            toast.success('Google account linked successfully');
+        },
+        onError: () => {
+            toast.error('Failed to link Google account');
+        }
+    });
+};
+
+export const useUnlinkAuthProvider = (): UseMutationResult<{ message: string }, Error, { providerName:string,providerId: string }> => {
+    return useMutation({
+        mutationFn: ({ providerName, providerId }) => unlinkAuthProvider(providerName,providerId),
+        onSuccess: () => {
+            toast.success('Authentication provider unlinked successfully');
+        },
+        onError: () => {
+            toast.error('Failed to unlink authentication provider');
+        }
+    });
+};
+
+export const useGetLinkedProviders = (): UseQueryResult<AuthProviderResponse[], Error> => {
+    return useQuery<AuthProviderResponse[], Error>({
+        queryKey: ['linkedProviders'],
+        queryFn: async () => {
+            try {
+                return await getLinkedProviders();
+            } catch (error) {
+                toast.error('Failed to fetch linked providers');
+                throw error;
+            }
+        }
+    });
+};
+
+
+export const useUpdateCustomerInfo =  (id: string): UseMutationResult<CustomerUpdateResponse, Error, CustomerUpdateRequest> => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (updateData: CustomerUpdateRequest) => updateCustomerInfo(id, updateData),
+        onSuccess:async () => {
+            await queryClient.invalidateQueries({ queryKey: ['customer', id] });
+            toast.success('Customer information updated successfully');
+        },
+        onError: (error) => {
+            toast.error('Failed to update customer information');
+            console.error('Update customer info error:', error);
         }
     });
 };

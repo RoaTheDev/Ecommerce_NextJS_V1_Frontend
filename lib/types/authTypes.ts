@@ -10,7 +10,8 @@ export interface UserData {
     phoneNumber: string;
     dob: string;
     gender: string;
-    customerId?: string;
+    userId?: string;
+    profile?: string
 }
 
 export interface LoginCredentials {
@@ -79,4 +80,40 @@ export interface CurrentUserResponse {
     customerId: number;
     displayName: string;
     email: string;
+}
+
+export interface AuthProviderResponse {
+    providerId: string;
+    providerName: string;
+    linkedAt: string;
+}
+
+export interface LinkGoogleRequest {
+    idToken: string;
+}
+
+export interface PasswordChangeRequest {
+    currentPassword?: string;
+    newPassword?: string;
+    confirmNewPassword?: string;
+}
+
+export interface CustomerUpdateRequest {
+    firstName?: string;
+    middleName?: string;
+    gender?: string;
+    lastName?: string;
+    phoneNumber?: string;
+    email?: string;
+    dob?: string;
+}
+
+export interface CustomerUpdateResponse {
+    firstName: string;
+    middleName?: string;
+    gender?: string;
+    lastName: string;
+    phoneNUmber: string;
+    email: string;
+    dob: string;
 }

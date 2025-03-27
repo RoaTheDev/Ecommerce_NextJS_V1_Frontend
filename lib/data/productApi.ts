@@ -13,7 +13,7 @@ import {
     ProductUpdateResponse
 } from "@/lib/types/productTypes";
 import {ConfirmationResponse} from "@/lib/types/commonTypes";
-import {apiErrorHandler} from "@/lib/api/apiErrorHandler";
+import {apiErrorHandler} from "@/lib/data/apiErrorHandler";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
 

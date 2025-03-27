@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 
 const AdminAccountPage = () => {
     const { currentUser } = useAuthStore();
-    const { data: userData, isLoading } = useCustomerProfile(currentUser?.customerId);
+    const { data: userData, isLoading } = useCustomerProfile(currentUser?.id);
     const [isEditing, setIsEditing] = useState(false);
 
     const {

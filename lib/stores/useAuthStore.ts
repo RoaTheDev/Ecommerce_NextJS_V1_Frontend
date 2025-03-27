@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 import { CurrentUserResponse, UserResponse } from '@/lib/types/authTypes';
-import { logout, me } from "@/lib/api/authApi";
+import { logout, me } from "@/lib/data/authApi";
 
 interface AuthState {
-    currentUser: { customerId: string; displayName: string; email: string } | null;
+    currentUser: { id: string; displayName: string; email: string } | null;
     isAuthenticated: boolean;
     login: (userData: UserResponse) => void;
     logout: () => Promise<void>;
@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthState>()(
             login: (userData: UserResponse) => {
                 set({
                     currentUser: {
-                        customerId: userData.customerId,
+                        id: userData.customerId,
                         displayName: userData.displayName,
                         email: userData.email,
                     },
@@ -45,7 +45,7 @@ export const useAuthStore = create<AuthState>()(
                     const userData: CurrentUserResponse = await me();
                     set({
                         currentUser: {
-                            customerId: userData.customerId.toString(),
+                            id: userData.customerId.toString(),
                             displayName: userData.displayName,
                             email: userData.email,
                         },

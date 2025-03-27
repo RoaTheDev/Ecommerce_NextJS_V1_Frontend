@@ -56,13 +56,11 @@ export default function ProductPage() {
                 Our Products
             </h1>
 
-            {/* Product Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                 {products.map((product) => (
                     <ProductCard key={String(product.productId)} product={product} />
                 ))}
 
-                {/* Loading more indicator */}
                 {hasMore && (
                     <div ref={ref} className="col-span-full flex justify-center py-8">
                         <LoadingSkeletons count={4} />

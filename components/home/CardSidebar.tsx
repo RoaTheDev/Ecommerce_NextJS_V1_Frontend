@@ -31,20 +31,20 @@ const CartSidebar: React.FC<CartSidebarProps> = ({onClose, open}) => {
                             size: "M",
                             color: "Green",
                             price: "$29.99",
-                            img: "/api/placeholder/80/80",
+                            img: "/data/placeholder/80/80",
                         },
                         {
                             name: "Forest Guardian Hoodie",
                             size: "L",
                             color: "Brown",
                             price: "$49.99",
-                            img: "/api/placeholder/80/80",
+                            img: "/data/placeholder/80/80",
                         },
                         {
                             name: "Woodland Explorer Cap",
                             color: "Beige",
                             price: "$19.99",
-                            img: "/api/placeholder/80/80",
+                            img: "/data/placeholder/80/80",
                         },
                     ].map((item, index) => (
                         <div

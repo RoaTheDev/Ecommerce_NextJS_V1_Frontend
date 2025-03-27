@@ -25,7 +25,7 @@ import {
     getProductById,
     removeProductTag,
     updateProduct
-} from "@/lib/api/productApi";
+} from "@/lib/data/productApi";
 
 // Query keys
 export const queryKeys = {

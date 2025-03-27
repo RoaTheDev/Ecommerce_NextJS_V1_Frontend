@@ -6,7 +6,7 @@ import {useForm} from 'react-hook-form';
 import {zodResolver} from '@hookform/resolvers/zod';
 import {LoginFormData, loginSchema} from '@/lib/schemas/authSchemas';
 import {useGoogleLogin, useLogin} from '@/lib/queries/useAuthQueries';
-import {CredentialResponse, GoogleLogin, GoogleOAuthProvider} from '@react-oauth/google';
+import {CredentialResponse, GoogleLogin} from '@react-oauth/google';
 import {AxiosError} from 'axios';
 import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
@@ -47,10 +47,9 @@ export default function LoginPage() {
         ? ((login.error as AxiosError<{ detail: string }>).response?.data?.detail || 'Login failed')
         : null;
 
-    const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
+    // const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '';
 
     return (
-        <GoogleOAuthProvider clientId={googleClientId}>
             <div className="flex justify-center items-center min-h-screen bg-[#F6F2E9] p-4">
                 <Card className="w-full max-w-md border-[#5CBD7B] border-2 shadow-lg">
                     <CardHeader className="bg-[#5CBD7B] text-white">
@@ -137,7 +136,6 @@ export default function LoginPage() {
                     </CardFooter>
                 </Card>
             </div>
-        </GoogleOAuthProvider>
     );
 };
 
