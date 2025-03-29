@@ -36,10 +36,35 @@ export const resetPasswordSchema = z.object({
     message: "Passwords don't match",
     path: ['confirmPassword']
 });
+export const userProfileSchema = z.object({
+    firstName: z.string().min(2, "First name must be at least 2 characters"),
+    middleName: z.string().optional(),
+    lastName: z.string().min(2, "Last name must be at least 2 characters"),
+    email: z.string().email("Invalid email address"),
+    phoneNumber: z.string()
+        .regex(/^\+?[1-9]\d{1,14}$/, "Invalid phone number format")
+        .optional(),
+    dob: z.string().refine(val => {
+        const date = new Date(val);
+        return !isNaN(date.getTime()) && date < new Date();
+    }, "Invalid date of birth"),
+    gender: z.enum(["Male", "Female", "Other"]),
+});
+export const passwordChangeSchema = z.object({
+    currentPassword: z.string().min(8, "Current password is required"),
+    newPassword: z.string()
+        .min(8, "New password must be at least 8 characters")
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+            "Password must include uppercase, lowercase, number, and special character"),
+    confirmNewPassword: z.string().min(8, "Confirm new password")
+}).refine((data) => data.newPassword === data.confirmNewPassword, {
+    message: "Passwords do not match",
+    path: ["confirmNewPassword"],
+});
 
+export type PasswordChangeFormValues = z.infer<typeof passwordChangeSchema>;
+export type UserProfileFormValues = z.infer<typeof userProfileSchema>;
 export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
-
-
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
 export type VerificationFormData = z.infer<typeof verificationSchema>;
