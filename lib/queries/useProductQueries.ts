@@ -1,6 +1,6 @@
 import {useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult} from "@tanstack/react-query";
 import {
-    PaginatedProductResponse,
+    ProductListingResponse,
     ProductByIdResponse,
     ProductCreateRequest,
     ProductCreateResponse,
@@ -10,7 +10,7 @@ import {
     ProductTagRemoveRequest,
     ProductTagToAddRequest,
     ProductUpdateRequest,
-    ProductUpdateResponse
+    ProductUpdateResponse, ProductFilterRequest, PaginatedProductResponse
 } from "@/lib/types/productTypes";
 import {ConfirmationResponse} from "@/lib/types/commonTypes";
 import {useProductStore} from "@/lib/stores/useProductStore";
@@ -21,7 +21,7 @@ import {
     changeProductStatus,
     createProduct,
     deleteProductImage,
-    getAllProduct,
+    getAllProduct, getBestSellingProduct, getFilteredProduct, getNewArrival,
     getProductById,
     removeProductTag,
     updateProduct
@@ -34,7 +34,13 @@ export const queryKeys = {
     paginatedList: (filters: { cursor: number, pageSize: number }) =>
         [...queryKeys.list(), filters] as const,
     details: () => [...queryKeys.base, 'detail'] as const,
-    detail: (id: number) => [...queryKeys.details(), id] as const
+    detail: (id: number) => [...queryKeys.details(), id] as const,
+    bestSelling: (filters: { cursor: number, pageSize: number }) =>
+        [...queryKeys.base, 'best-selling', filters] as const,
+    newArrival: (filters: { cursor: number, pageSize: number }) =>
+        [...queryKeys.base, 'new-arrival', filters] as const,
+    filtered: (filters: ProductFilterRequest & { cursor: number, pageSize: number }) =>
+        [...queryKeys.base, 'filtered', filters] as const
 };
 
 // Get a single product by ID
@@ -54,12 +60,12 @@ export function useProduct(id?: number): UseQueryResult<ProductByIdResponse, Err
 }
 
 // Get all products with pagination
-export function useProducts(cursor: number, pageSize: number): UseQueryResult<PaginatedProductResponse, Error> {
+export function useProducts(cursor: number, pageSize: number): UseQueryResult<ProductListingResponse, Error> {
     const setPagination = useProductStore((state) => state.setPagination);
 
-    return useQuery<PaginatedProductResponse, Error>({
+    return useQuery<ProductListingResponse, Error>({
         queryKey: queryKeys.paginatedList({cursor, pageSize}),
-        queryFn: async (): Promise<PaginatedProductResponse> => {
+        queryFn: async (): Promise<ProductListingResponse> => {
             const data = await getAllProduct(cursor, pageSize);
             setPagination(data.nextCursor, data.pageSize); // Move side effect here
             return data;
@@ -182,5 +188,56 @@ export function useRemoveProductTag(productId: number): UseMutationResult<Confir
         onSuccess: async () => {
             await queryClient.invalidateQueries({queryKey: queryKeys.detail(productId)});
         }
+    });
+}
+
+export function useBestSellingProducts(cursor: number, pageSize: number): UseQueryResult<PaginatedProductResponse, Error> {
+    const setPagination = useProductStore((state) => state.setPagination);
+
+    return useQuery<PaginatedProductResponse, Error>({
+        queryKey: queryKeys.bestSelling({ cursor, pageSize }),
+        queryFn: async (): Promise<PaginatedProductResponse> => {
+            const data = await getBestSellingProduct(cursor, pageSize);
+            setPagination(data.nextCursor, data.pageSize);
+            return data;
+        },
+        placeholderData: (previousData) => previousData
+    });
+}
+
+export function useNewArrivalProducts(cursor: number, pageSize: number): UseQueryResult<PaginatedProductResponse, Error> {
+    const setPagination = useProductStore((state) => state.setPagination);
+
+    return useQuery<PaginatedProductResponse, Error>({
+        queryKey: queryKeys.newArrival({ cursor, pageSize }),
+        queryFn: async (): Promise<PaginatedProductResponse> => {
+            const data = await getNewArrival(cursor, pageSize);
+            setPagination(data.nextCursor, data.pageSize);
+            return data;
+        },
+        placeholderData: (previousData) => previousData
+    });
+}
+export function useFilteredProducts(
+    filterRequest: ProductFilterRequest,
+    cursor: number,
+    pageSize: number
+): UseQueryResult<PaginatedProductResponse, Error> {
+    const setPagination = useProductStore((state) => state.setPagination);
+    const addSearchTerm = useProductStore((state) => state.addSearchTerm);
+
+    return useQuery<PaginatedProductResponse, Error>({
+        queryKey: queryKeys.filtered({ ...filterRequest, cursor, pageSize }),
+        queryFn: async (): Promise<PaginatedProductResponse> => {
+            const data = await getFilteredProduct(filterRequest, cursor, pageSize);
+            setPagination(data.nextCursor, data.pageSize);
+
+            if (filterRequest.searchQuery) {
+                addSearchTerm(filterRequest.searchQuery, data.products);
+            }
+
+            return data;
+        },
+        placeholderData: (previousData) => previousData
     });
 }

@@ -42,16 +42,20 @@ export interface ProductByIdResponse extends ProductResponse {
     imageUrls: string[],
     tags: string[]
 }
+
 export interface PaginatedProduct extends ProductResponse {
     categoryName: string,
     imageUrls: string,
+    createAt: string,
     tags: string[]
 }
-export interface PaginatedProductResponse {
+
+export interface ProductListingResponse {
     products: PaginatedProduct[],
     nextCursor: number,
     pageSize: number
 }
+
 
 export interface ProductCreateResponse extends ProductResponse {
     createBy: number,
@@ -82,4 +86,59 @@ export interface ProductStatusChange {
 
 export interface ProductUpdateResponse extends ProductResponse {
     updateAt: string
+}
+
+export interface AppliedProductFilters {
+    categoryId?: number;
+    tagIds?: number[];
+    minPrice?: number;
+    maxPrice?: number;
+    inStock?: boolean;
+    sortBy?: string;
+    sortOrder?: string;
+    searchQuery?: string;
+}
+
+export enum SortOrder {
+    Ascending = 'Ascending',
+    Descending = 'Descending'
+}
+
+export interface ProductFilterRequest {
+    categoryId?: number,
+    tagIds?: number[],
+    minPrice?: number,
+    maxPrice?: number,
+    inStock?: boolean,
+    sortBy?: SortByEnum,
+    searchQuery?: string
+}
+
+
+export interface PaginatedProductResponse {
+    products: PaginatedProduct[],
+    nextCursor: number,
+    pageSize: number,
+    appliedFilters?: AppliedProductFilters
+}
+
+export enum SortByEnum {
+    none = 'None',
+    minPrice = 'MinPrice',
+    maxPrice = 'MaxPrice',
+    name = 'Name',
+    date = 'Date',
+    latest = 'Latest',
+    bestSelling = 'BestSelling'
+}
+
+export interface AllTagResponse {
+    tagId: number,
+    tagName: string
+}
+
+export interface GetTagByIdResponse {
+    tagId: number,
+    tagName: string,
+    isDeleted: boolean
 }

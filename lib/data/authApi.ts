@@ -48,7 +48,7 @@ export const googleLogin = async (tokenId: { idToken: string }): Promise<UserRes
     return response.data;
 };
 
-export const fetchCustomerProfile = async (id: string): Promise<UserData> => {
+export const fetchCustomerProfile = async (id: string | number): Promise<UserData> => {
     const response: AxiosResponse<UserData> = await authApi.get(`/Auth/${id}`);
     return response.data;
 };
@@ -91,7 +91,7 @@ export const getLinkedProviders = async (): Promise<AuthProviderResponse[]> => {
     return response.data;
 };
 
-export const changeProfileImage = async (id: string, file: File): Promise<{ message: string }> => {
+export const changeProfileImage = async (id: string | number, file: File): Promise<{ message: string }> => {
     const formData = new FormData();
     formData.append('file', file);
 
@@ -102,7 +102,7 @@ export const changeProfileImage = async (id: string, file: File): Promise<{ mess
     return response.data;
 };
 
-export const updateCustomerInfo = async (id: string, updateData: CustomerUpdateRequest): Promise<CustomerUpdateResponse> => {
+export const updateCustomerInfo = async (id: string | number, updateData: CustomerUpdateRequest): Promise<CustomerUpdateResponse> => {
     const response: AxiosResponse<CustomerUpdateResponse> = await authApi.patch(`/Customer/${id}`, updateData);
     return response.data;
 };

@@ -4,7 +4,7 @@ import { CurrentUserResponse, UserResponse } from '@/lib/types/authTypes';
 import { logout, me } from "@/lib/data/authApi";
 
 interface AuthState {
-    currentUser: { id: string; displayName: string; email: string } | null;
+    currentUser: { id: string | number; displayName: string; email: string } | null;
     isAuthenticated: boolean;
     login: (userData: UserResponse) => void;
     logout: () => Promise<void>;
@@ -20,7 +20,7 @@ export const useAuthStore = create<AuthState>()(
             login: (userData: UserResponse) => {
                 set({
                     currentUser: {
-                        id: userData.customerId,
+                        id: userData.userId,
                         displayName: userData.displayName,
                         email: userData.email,
                     },

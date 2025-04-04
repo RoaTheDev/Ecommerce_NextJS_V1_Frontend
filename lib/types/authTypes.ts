@@ -24,7 +24,7 @@ export interface OtpData {
 }
 
 export interface UserResponse {
-    customerId: string;
+    userId: string | number;
     displayName: string;
     email: string;
     token: {

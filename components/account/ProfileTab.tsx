@@ -1,30 +1,26 @@
 'use client';
-import React, { useEffect, useState } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Camera, Mail, Phone, Calendar, User } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import {
-    useChangeProfileImage,
-    useCustomerProfile,
-    useUpdateCustomerInfo
-} from '@/lib/queries/useAuthQueries';
-import { useAuthStore } from '@/lib/stores/useAuthStore';
+import React, {useEffect, useState} from 'react';
+import {Controller, useForm} from 'react-hook-form';
+import {zodResolver} from '@hookform/resolvers/zod';
+import {Calendar, Camera, Mail, Phone, User} from 'lucide-react';
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
+import {Label} from "@/components/ui/label";
+import {Avatar, AvatarFallback, AvatarImage} from "@/components/ui/avatar";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {useChangeProfileImage, useCustomerProfile, useUpdateCustomerInfo} from '@/lib/queries/useAuthQueries';
+import {useAuthStore} from '@/lib/stores/useAuthStore';
 import toast from "react-hot-toast";
 import {UserProfileFormValues, userProfileSchema} from "@/lib/schemas/authSchemas";
 
 
 const ProfileTab: React.FC = () => {
-    const { currentUser } = useAuthStore();
+    const {currentUser} = useAuthStore();
     const [isProfileEditing, setIsProfileEditing] = useState(false);
     const baseUrl = process.env.NEXT_PUBLIC_IMAGE_URLS;
 
-    const { data: profile, isLoading: isProfileLoading } = useCustomerProfile(currentUser?.id);
+    const {data: profile, isLoading: isProfileLoading} = useCustomerProfile(currentUser?.id);
     const changeProfileImageMutation = useChangeProfileImage(currentUser?.id || '');
     const updateProfileMutation = useUpdateCustomerInfo(currentUser?.id || '');
 
@@ -54,6 +50,7 @@ const ProfileTab: React.FC = () => {
             });
         }
     }, [profile, profileForm]);
+
 
     const handleProfileImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -89,7 +86,7 @@ const ProfileTab: React.FC = () => {
                 className="bg-[hsl(148,58%,55%)]/10 py-4 flex flex-col sm:flex-row justify-between items-center gap-3"
             >
                 <CardTitle className="text-[hsl(149,41%,39%)] text-xl font-semibold flex items-center gap-2">
-                    <User className="w-6 h-6 text-[hsl(149,41%,39%)]" />
+                    <User className="w-6 h-6 text-[hsl(149,41%,39%)]"/>
                     Personal Information
                 </CardTitle>
                 {!isProfileEditing ? (
@@ -129,7 +126,8 @@ const ProfileTab: React.FC = () => {
                     {/* Profile Picture Section */}
                     <div className="md:w-1/4 flex flex-col items-center">
                         <div className="relative group mb-4">
-                            <Avatar className="w-40 h-40 border-3 border-[hsl(138,49%,70%)] transition-transform group-hover:scale-105">
+                            <Avatar
+                                className="w-40 h-40 border-3 border-[hsl(138,49%,70%)] transition-transform group-hover:scale-105">
                                 <AvatarImage
                                     src={`${baseUrl}${profile?.profile}` || '/default-avatar.png'}
                                     alt="Profile"
@@ -152,9 +150,10 @@ const ProfileTab: React.FC = () => {
                                 />
                             </label>
                         </div>
-                        <p className="text-[hsl(32,32%,41%)] text-sm text-center">
-                            Update your profile picture
-                        </p>
+                        {isProfileEditing &&
+                            <p className="text-[hsl(32,32%,41%)] text-sm text-center">
+                                Update your profile picture
+                            </p>}
                     </div>
 
                     {/* Profile Details Form */}
@@ -162,7 +161,7 @@ const ProfileTab: React.FC = () => {
                         {/* First Name */}
                         <div className="space-y-2">
                             <Label className="text-[hsl(149,41%,39%)] text-sm flex items-center gap-2">
-                                <User className="w-4 h-4" /> First Name
+                                <User className="w-4 h-4"/> First Name
                             </Label>
                             <Controller
                                 name="firstName"
@@ -185,7 +184,7 @@ const ProfileTab: React.FC = () => {
                         {/* Middle Name */}
                         <div className="space-y-2">
                             <Label className="text-[hsl(149,41%,39%)] text-sm flex items-center gap-2">
-                                <User className="w-4 h-4" /> Middle Name
+                                <User className="w-4 h-4"/> Middle Name
                             </Label>
                             <Controller
                                 name="middleName"
@@ -203,7 +202,7 @@ const ProfileTab: React.FC = () => {
                         {/* Last Name */}
                         <div className="space-y-2">
                             <Label className="text-[hsl(149,41%,39%)] text-sm flex items-center gap-2">
-                                <User className="w-4 h-4" /> Last Name
+                                <User className="w-4 h-4"/> Last Name
                             </Label>
                             <Controller
                                 name="lastName"
@@ -226,7 +225,7 @@ const ProfileTab: React.FC = () => {
                         {/* Email */}
                         <div className="space-y-2">
                             <Label className="text-[hsl(149,41%,39%)] text-sm flex items-center gap-2">
-                                <Mail className="w-4 h-4" /> Email
+                                <Mail className="w-4 h-4"/> Email
                             </Label>
                             <Controller
                                 name="email"
@@ -250,7 +249,7 @@ const ProfileTab: React.FC = () => {
                         {/* Phone Number */}
                         <div className="space-y-2">
                             <Label className="text-[hsl(149,41%,39%)] text-sm flex items-center gap-2">
-                                <Phone className="w-4 h-4" /> Phone Number
+                                <Phone className="w-4 h-4"/> Phone Number
                             </Label>
                             <Controller
                                 name="phoneNumber"
@@ -275,7 +274,7 @@ const ProfileTab: React.FC = () => {
                         {/* Date of Birth */}
                         <div className="space-y-2">
                             <Label className="text-[hsl(149,41%,39%)] text-sm flex items-center gap-2">
-                                <Calendar className="w-4 h-4" /> Date of Birth
+                                <Calendar className="w-4 h-4"/> Date of Birth
                             </Label>
                             <Controller
                                 name="dob"
@@ -308,8 +307,9 @@ const ProfileTab: React.FC = () => {
                                         value={field.value}
                                         onValueChange={field.onChange}
                                     >
-                                        <SelectTrigger className="border-[hsl(138,49%,70%)] focus:border-[hsl(149,41%,39%)] text-sm">
-                                            <SelectValue placeholder="Select Gender" />
+                                        <SelectTrigger
+                                            className="border-[hsl(138,49%,70%)] focus:border-[hsl(149,41%,39%)] text-sm">
+                                            <SelectValue placeholder="Select Gender"/>
                                         </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="Male">Male</SelectItem>

@@ -4,8 +4,10 @@ import {
     ProductByIdResponse,
     ProductCreateRequest,
     ProductCreateResponse,
+    ProductFilterRequest,
     ProductImageChangeResponse,
     ProductImageResponse,
+    ProductListingResponse,
     ProductStatusChange,
     ProductTagRemoveRequest,
     ProductTagToAddRequest,
@@ -76,7 +78,30 @@ export const getProductById = async (id: number): Promise<ProductByIdResponse> =
     return response.data
 }
 
-export const getAllProduct = async (cursor: number, pageSize: number): Promise<PaginatedProductResponse> => {
-    const response: AxiosResponse<PaginatedProductResponse> = await productApi.get(`/Product?cursor=${cursor}&pageSize=${pageSize}`);
+export const getAllProduct = async (cursor: number, pageSize: number): Promise<ProductListingResponse> => {
+    const response: AxiosResponse<ProductListingResponse> = await productApi.get(`/Product?cursor=${cursor}&pageSize=${pageSize}`);
     return response.data
+}
+
+export const getBestSellingProduct = async (cursor: number, pageSize: number): Promise<PaginatedProductResponse> => {
+    const response: AxiosResponse<PaginatedProductResponse> = await productApi.get('/Product/best-selling', {
+        params: { cursor, pageSize }
+    });
+    return response.data;
+}
+export const getNewArrival = async (cursor: number, pageSize: number): Promise<PaginatedProductResponse> => {
+    const response: AxiosResponse<PaginatedProductResponse> = await productApi.get('/Product/new-arrival', {
+        params: { cursor, pageSize }
+    });
+    return response.data;
+}
+export const getFilteredProduct = async (filterRequest: ProductFilterRequest, cursor: number, pageSize: number): Promise<PaginatedProductResponse> => {
+    const response: AxiosResponse<PaginatedProductResponse> = await productApi.get('/Product/filter', {
+        params: {
+            ...filterRequest,
+            cursor,
+            pageSize
+        }
+    });
+    return response.data;
 }

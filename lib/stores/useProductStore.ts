@@ -1,5 +1,5 @@
 import {create} from "zustand";
-import {ProductByIdResponse} from "@/lib/types/productTypes";
+import {PaginatedProduct, ProductByIdResponse} from "@/lib/types/productTypes";
 import {createJSONStorage, persist} from "zustand/middleware";
 
 interface ProductState {
@@ -8,11 +8,11 @@ interface ProductState {
         cursor: number;
         pageSize: number;
     };
-    searchTerms: { term: string, products: ProductByIdResponse[] }[];
+    searchTerms: { term: string, products: PaginatedProduct[] }[];
     setSelectedProduct: (product: ProductByIdResponse) => void;
     clearSelectedProduct: () => void;
     setPagination: (cursor: number, pageSize: number) => void;
-    addSearchTerm: (term: string, products: ProductByIdResponse[]) => void;
+    addSearchTerm: (term: string, products: PaginatedProduct[]) => void;
     clearSearch: () => void;
 }
 

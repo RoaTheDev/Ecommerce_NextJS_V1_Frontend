@@ -4,18 +4,25 @@ import {
     changePassword,
     changeProfileImage,
     fetchCustomerProfile,
-    forgotPassword, getLinkedProviders,
-    googleLogin, linkGoogleAccount,
+    forgotPassword,
+    getLinkedProviders,
+    googleLogin,
+    linkGoogleAccount,
     loginUser,
     registerUser,
-    resetPassword, unlinkAuthProvider, updateCustomerInfo,
+    resetPassword,
+    unlinkAuthProvider,
+    updateCustomerInfo,
     verifyEmail
 } from '@/lib/data/authApi';
 import {useAuthStore} from '@/lib/stores/useAuthStore';
 import {
-    AuthProviderResponse, CustomerUpdateRequest, CustomerUpdateResponse,
+    AuthProviderResponse,
+    CustomerUpdateRequest,
+    CustomerUpdateResponse,
     ForgotPasswordResponse,
-    LoginCredentials, PasswordChangeRequest,
+    LoginCredentials,
+    PasswordChangeRequest,
     ResetPasswordRequest,
     ResetPasswordResponse,
     UserData,
@@ -42,8 +49,11 @@ export const useVerifyEmail = (): UseMutationResult<UserResponse, Error, VerifyE
     return useMutation({
         mutationFn: ({session, otp}: VerifyEmailParams) => verifyEmail(session, {otp: parseInt(otp)}),
         onSuccess: (data) => {
+            console.log(data)
             login(data);
-            router.push('/admin/dashboard');
+            const decodedToken = jwtDecode<{ exp: number; role: string }>(data.token.token);
+            const role = decodedToken.role;
+            return role === 'Admin' ? router.push('/admin/dashboard') : router.push('/');
         }, onError: () => {
             toast.error('Email verification failed.');
         }
@@ -69,7 +79,6 @@ export const useLogin = (): UseMutationResult<UserResponse, Error, LoginCredenti
 };
 
 
-
 export const useGoogleLogin = (): UseMutationResult<UserResponse, Error, { idToken: string }> => {
     const router = useRouter();
     const login = useAuthStore(state => state.login);
@@ -88,7 +97,7 @@ export const useGoogleLogin = (): UseMutationResult<UserResponse, Error, { idTok
     });
 };
 
-export const useCustomerProfile = (id?: string): UseQueryResult<UserData, Error> => {
+export const useCustomerProfile = (id?: string | number): UseQueryResult<UserData, Error> => {
     return useQuery({
         queryKey: ['customer', id],
         queryFn: () => {
@@ -150,10 +159,12 @@ export const useChangePassword = (id: string): UseMutationResult<{ message: stri
     });
 };
 
-export const useChangeProfileImage = (id: string): UseMutationResult<{ message: string }, Error, File> => {
+export const useChangeProfileImage = (id: string | number): UseMutationResult<{ message: string }, Error, File> => {
+    const queryClient = useQueryClient();
     return useMutation({
         mutationFn: (file: File) => changeProfileImage(id, file),
-        onSuccess: () => {
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({queryKey: ['customer', id]})
             toast.success('Profile image updated successfully');
         },
         onError: () => {
@@ -174,9 +185,12 @@ export const useLinkGoogleAccount = (): UseMutationResult<{ message: string }, E
     });
 };
 
-export const useUnlinkAuthProvider = (): UseMutationResult<{ message: string }, Error, { providerName:string,providerId: string }> => {
+export const useUnlinkAuthProvider = (): UseMutationResult<{ message: string }, Error, {
+    providerName: string,
+    providerId: string
+}> => {
     return useMutation({
-        mutationFn: ({ providerName, providerId }) => unlinkAuthProvider(providerName,providerId),
+        mutationFn: ({providerName, providerId}) => unlinkAuthProvider(providerName, providerId),
         onSuccess: () => {
             toast.success('Authentication provider unlinked successfully');
         },
@@ -201,13 +215,13 @@ export const useGetLinkedProviders = (): UseQueryResult<AuthProviderResponse[], 
 };
 
 
-export const useUpdateCustomerInfo =  (id: string): UseMutationResult<CustomerUpdateResponse, Error, CustomerUpdateRequest> => {
+export const useUpdateCustomerInfo = (id: string | number): UseMutationResult<CustomerUpdateResponse, Error, CustomerUpdateRequest> => {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (updateData: CustomerUpdateRequest) => updateCustomerInfo(id, updateData),
-        onSuccess:async () => {
-            await queryClient.invalidateQueries({ queryKey: ['customer', id] });
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({queryKey: ['customer', id]});
             toast.success('Customer information updated successfully');
         },
         onError: (error) => {
