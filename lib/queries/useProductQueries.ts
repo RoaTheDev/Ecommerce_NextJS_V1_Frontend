@@ -28,7 +28,7 @@ import {
 } from "@/lib/data/productApi";
 
 // Query keys
-export const queryKeys = {
+ const queryKeys = {
     base: ['product'] as const,
     list: () => [...queryKeys.base, 'list'] as const,
     paginatedList: (filters: { cursor: number, pageSize: number }) =>

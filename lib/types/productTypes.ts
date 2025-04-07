@@ -132,13 +132,3 @@ export enum SortByEnum {
     bestSelling = 'BestSelling'
 }
 
-export interface AllTagResponse {
-    tagId: number,
-    tagName: string
-}
-
-export interface GetTagByIdResponse {
-    tagId: number,
-    tagName: string,
-    isDeleted: boolean
-}

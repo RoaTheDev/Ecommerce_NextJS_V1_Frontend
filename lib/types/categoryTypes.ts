@@ -15,19 +15,24 @@ export interface CategoryUpdateRequest {
     updateBy: number
 }
 
-export interface categoryResponse {
+export interface CategoryResponse {
     categoryName: string,
     description: string
 }
 
-export interface CategoryCreateRequest extends categoryResponse {
+export interface CategoryCreateResponse extends CategoryResponse {
     categoryId: number,
     createBy: number,
     isActive: boolean
 }
 
-export interface categoryListResponse extends categoryResponse {
+interface CategoryListResponse extends CategoryResponse {
     categoryId: number,
     isActive: boolean
 }
 
+export interface PaginatedCategoryResponse {
+    categories: CategoryListResponse,
+    cursor: number,
+    pageSize: number
+}
