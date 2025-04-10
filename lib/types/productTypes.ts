@@ -123,12 +123,12 @@ export interface PaginatedProductResponse {
 }
 
 export enum SortByEnum {
-    none = 'None',
-    minPrice = 'MinPrice',
-    maxPrice = 'MaxPrice',
-    name = 'Name',
-    date = 'Date',
-    latest = 'Latest',
-    bestSelling = 'BestSelling'
+    None = 'None',
+    MinPrice = 'MinPrice',
+    MaxPrice = 'MaxPrice',
+    Name = 'Name',
+    Date = 'Date',
+    Latest = 'Latest',
+    BestSelling = 'BestSelling'
 }
 

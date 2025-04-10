@@ -147,7 +147,7 @@ export const useLogout = (): UseMutationResult<void, Error, void> => {
     });
 };
 
-export const useChangePassword = (id: string): UseMutationResult<{ message: string }, Error, PasswordChangeRequest> => {
+export const useChangePassword = (id: string | number): UseMutationResult<{ message: string }, Error, PasswordChangeRequest> => {
     return useMutation({
         mutationFn: (data: PasswordChangeRequest) => changePassword(id, data),
         onSuccess: () => {

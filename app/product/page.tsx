@@ -2,10 +2,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useInView } from 'react-intersection-observer';
-import {PaginatedProduct} from '@/lib/types/productTypes';
+import { PaginatedProduct, ProductFilterRequest, SortByEnum } from '@/lib/types/productTypes';
 import { useProducts } from '@/lib/queries/useProductQueries';
-import {ProductCard} from "@/components/product/ProductCard";
-import {LoadingSkeletons} from "@/components/product/LoadingSkeletion";
+import { ProductCard } from "@/components/product/ProductCard";
+import { LoadingSkeletons } from "@/components/product/LoadingSkeletion";
+import ProductFilter from "@/components/product/ProductFilter"; // Import the filter component
+import { FormProvider, useForm } from 'react-hook-form'; // Import FormProvider
 
 export default function ProductPage() {
     const [products, setProducts] = useState<PaginatedProduct[]>([]);
@@ -14,17 +16,33 @@ export default function ProductPage() {
     const { ref, inView } = useInView();
     const initialLoadComplete = useRef(false);
 
+    // Initial filter parameters
+    const initialFilterParams: ProductFilterRequest = {
+        sortBy: SortByEnum.Latest
+    };
+
+    // Set up form context that will be passed to ProductFilter
+    const formMethods = useForm({
+        defaultValues: initialFilterParams
+    });
+
+    // Current filter parameters state
+    const [filterParams, setFilterParams] = useState<ProductFilterRequest>(initialFilterParams);
+
     const PAGE_SIZE = 12;
-    const { data, isLoading, isError } = useProducts(cursor, PAGE_SIZE);
+    const { data, isLoading, isError } = useProducts(cursor, PAGE_SIZE, filterParams);
 
     useEffect(() => {
         if (data && !isLoading) {
-            setProducts(prev => {
-                // Filter out duplicates
-                const productIds = new Set(prev.map(p => Number(p.productId)));
-                const newProducts = data.products.filter(p => !productIds.has(Number(p.productId)));
-                return [...prev, ...newProducts];
-            });
+            if (cursor === 0) {
+                setProducts(data.products);
+            } else {
+                setProducts(prev => {
+                    const productIds = new Set(prev.map(p => Number(p.productId)));
+                    const newProducts = data.products.filter(p => !productIds.has(Number(p.productId)));
+                    return [...prev, ...newProducts];
+                });
+            }
 
             setHasMore(data.nextCursor !== null);
             if (data.nextCursor !== null) {
@@ -37,9 +55,20 @@ export default function ProductPage() {
     useEffect(() => {
         if (inView && hasMore && initialLoadComplete.current) {
             // Load more products when the last item is in view
-            // The actual loading is triggered by changing cursor which updates the useProducts hook
         }
     }, [inView, hasMore]);
+
+    // Handler for filter changes
+    const handleFilterChange = async (filter: ProductFilterRequest) => {
+        // Reset pagination when filters change
+        setProducts([]);
+        setCursor(0);
+        setHasMore(true);
+        initialLoadComplete.current = false;
+
+        // Update filter parameters
+        setFilterParams(filter);
+    };
 
     if (isError) {
         return (
@@ -56,14 +85,22 @@ export default function ProductPage() {
                 Our Products
             </h1>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {/* Wrap the filter in FormProvider */}
+            <FormProvider {...formMethods}>
+                <ProductFilter
+                    onFilterChangeAction={handleFilterChange}
+                    initialFilter={filterParams}
+                />
+            </FormProvider>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-6">
                 {products.map((product) => (
                     <ProductCard key={String(product.productId)} product={product} />
                 ))}
 
                 {hasMore && (
                     <div ref={ref} className="col-span-full flex justify-center py-8">
-                        <LoadingSkeletons count={4} />
+                        {isLoading && <LoadingSkeletons count={4} />}
                     </div>
                 )}
             </div>
@@ -78,5 +115,3 @@ export default function ProductPage() {
         </div>
     );
 }
-
-

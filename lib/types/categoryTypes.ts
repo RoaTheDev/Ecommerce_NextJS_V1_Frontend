@@ -26,13 +26,13 @@ export interface CategoryCreateResponse extends CategoryResponse {
     isActive: boolean
 }
 
-interface CategoryListResponse extends CategoryResponse {
+export interface CategoryListResponse extends CategoryResponse {
     categoryId: number,
     isActive: boolean
 }
 
 export interface PaginatedCategoryResponse {
-    categories: CategoryListResponse,
+    categories: CategoryListResponse[],
     cursor: number,
     pageSize: number
 }

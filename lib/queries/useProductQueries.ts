@@ -1,6 +1,5 @@
-import {useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult} from "@tanstack/react-query";
+import { useMutation, UseMutationResult, useQuery, useQueryClient, UseQueryResult } from "@tanstack/react-query";
 import {
-    ProductListingResponse,
     ProductByIdResponse,
     ProductCreateRequest,
     ProductCreateResponse,
@@ -10,10 +9,12 @@ import {
     ProductTagRemoveRequest,
     ProductTagToAddRequest,
     ProductUpdateRequest,
-    ProductUpdateResponse, ProductFilterRequest, PaginatedProductResponse
+    ProductUpdateResponse,
+    ProductFilterRequest,
+    PaginatedProductResponse
 } from "@/lib/types/productTypes";
-import {ConfirmationResponse} from "@/lib/types/commonTypes";
-import {useProductStore} from "@/lib/stores/useProductStore";
+import { ConfirmationResponse } from "@/lib/types/commonTypes";
+import { useProductStore } from "@/lib/stores/useProductStore";
 import {
     addProductImage,
     addTagToProduct,
@@ -21,17 +22,19 @@ import {
     changeProductStatus,
     createProduct,
     deleteProductImage,
-    getAllProduct, getBestSellingProduct, getFilteredProduct, getNewArrival,
+    getAllProduct,
+    getBestSellingProduct,
+    getNewArrival,
     getProductById,
     removeProductTag,
     updateProduct
 } from "@/lib/data/productApi";
 
 // Query keys
- const queryKeys = {
+const queryKeys = {
     base: ['product'] as const,
     list: () => [...queryKeys.base, 'list'] as const,
-    paginatedList: (filters: { cursor: number, pageSize: number }) =>
+    paginatedList: (filters: { cursor: number, pageSize: number, filter?: ProductFilterRequest }) =>
         [...queryKeys.list(), filters] as const,
     details: () => [...queryKeys.base, 'detail'] as const,
     detail: (id: number) => [...queryKeys.details(), id] as const,
@@ -39,8 +42,6 @@ import {
         [...queryKeys.base, 'best-selling', filters] as const,
     newArrival: (filters: { cursor: number, pageSize: number }) =>
         [...queryKeys.base, 'new-arrival', filters] as const,
-    filtered: (filters: ProductFilterRequest & { cursor: number, pageSize: number }) =>
-        [...queryKeys.base, 'filtered', filters] as const
 };
 
 // Get a single product by ID
@@ -59,18 +60,28 @@ export function useProduct(id?: number): UseQueryResult<ProductByIdResponse, Err
     });
 }
 
-// Get all products with pagination
-export function useProducts(cursor: number, pageSize: number): UseQueryResult<ProductListingResponse, Error> {
+// Get all products with pagination and optional filtering
+export function useProducts(
+    cursor: number,
+    pageSize: number,
+    filter?: ProductFilterRequest
+): UseQueryResult<PaginatedProductResponse, Error> {
     const setPagination = useProductStore((state) => state.setPagination);
+    const addSearchTerm = useProductStore((state) => state.addSearchTerm);
 
-    return useQuery<ProductListingResponse, Error>({
-        queryKey: queryKeys.paginatedList({cursor, pageSize}),
-        queryFn: async (): Promise<ProductListingResponse> => {
-            const data = await getAllProduct(cursor, pageSize);
-            setPagination(data.nextCursor, data.pageSize); // Move side effect here
+    return useQuery<PaginatedProductResponse, Error>({
+        queryKey: queryKeys.paginatedList({ cursor, pageSize, filter }),
+        queryFn: async (): Promise<PaginatedProductResponse> => {
+            const data = await getAllProduct(cursor, pageSize, filter);
+            setPagination(data.nextCursor, data.pageSize);
+
+            if (filter?.searchQuery) {
+                addSearchTerm(filter.searchQuery, data.products);
+            }
+
             return data;
         },
-        placeholderData: (previousData) => previousData
+        placeholderData: (previousData) => previousData,
     });
 }
 
@@ -83,7 +94,7 @@ export function useCreateProduct(): UseMutationResult<ProductCreateResponse, Err
             return await createProduct(productData);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.list()});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.list() });
         }
     });
 }
@@ -97,8 +108,8 @@ export function useUpdateProduct(id: number): UseMutationResult<ProductUpdateRes
             return await updateProduct(id, productData);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.detail(id)});
-            await queryClient.invalidateQueries({queryKey: queryKeys.list()});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.detail(id) });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.list() });
         }
     });
 }
@@ -112,8 +123,8 @@ export function useChangeProductStatus(): UseMutationResult<ProductStatusChange,
             return await changeProductStatus(id);
         },
         onSuccess: async (data: ProductStatusChange) => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.detail(data.productId)});
-            await queryClient.invalidateQueries({queryKey: queryKeys.list()});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.detail(data.productId) });
+            await queryClient.invalidateQueries({ queryKey: queryKeys.list() });
         }
     });
 }
@@ -127,24 +138,21 @@ export function useAddProductImage(productId: number): UseMutationResult<Product
             return await addProductImage(productId, files);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.detail(productId)});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.detail(productId) });
         }
     });
 }
 
 // Change a product image
-export function useChangeProductImage(productId: number): UseMutationResult<ProductImageChangeResponse, Error, {
-    imageId: number;
-    file: File
-}> {
+export function useChangeProductImage(productId: number): UseMutationResult<ProductImageChangeResponse, Error, { imageId: number; file: File }> {
     const queryClient = useQueryClient();
 
     return useMutation<ProductImageChangeResponse, Error, { imageId: number; file: File }>({
-        mutationFn: async ({imageId, file}: { imageId: number; file: File }): Promise<ProductImageChangeResponse> => {
+        mutationFn: async ({ imageId, file }: { imageId: number; file: File }): Promise<ProductImageChangeResponse> => {
             return await changeProductImage(productId, imageId, file);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.detail(productId)});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.detail(productId) });
         }
     });
 }
@@ -158,7 +166,7 @@ export function useDeleteProductImage(productId: number): UseMutationResult<Conf
             return await deleteProductImage(productId, imageId);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.detail(productId)});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.detail(productId) });
         }
     });
 }
@@ -172,7 +180,7 @@ export function useAddProductTag(productId: number): UseMutationResult<Confirmat
             return await addTagToProduct(productId, tagData);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.detail(productId)});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.detail(productId) });
         }
     });
 }
@@ -186,11 +194,12 @@ export function useRemoveProductTag(productId: number): UseMutationResult<Confir
             return await removeProductTag(productId, tagData);
         },
         onSuccess: async () => {
-            await queryClient.invalidateQueries({queryKey: queryKeys.detail(productId)});
+            await queryClient.invalidateQueries({ queryKey: queryKeys.detail(productId) });
         }
     });
 }
 
+// Get best-selling products
 export function useBestSellingProducts(cursor: number, pageSize: number): UseQueryResult<PaginatedProductResponse, Error> {
     const setPagination = useProductStore((state) => state.setPagination);
 
@@ -205,6 +214,7 @@ export function useBestSellingProducts(cursor: number, pageSize: number): UseQue
     });
 }
 
+// Get new arrival products
 export function useNewArrivalProducts(cursor: number, pageSize: number): UseQueryResult<PaginatedProductResponse, Error> {
     const setPagination = useProductStore((state) => state.setPagination);
 
@@ -213,29 +223,6 @@ export function useNewArrivalProducts(cursor: number, pageSize: number): UseQuer
         queryFn: async (): Promise<PaginatedProductResponse> => {
             const data = await getNewArrival(cursor, pageSize);
             setPagination(data.nextCursor, data.pageSize);
-            return data;
-        },
-        placeholderData: (previousData) => previousData
-    });
-}
-export function useFilteredProducts(
-    filterRequest: ProductFilterRequest,
-    cursor: number,
-    pageSize: number
-): UseQueryResult<PaginatedProductResponse, Error> {
-    const setPagination = useProductStore((state) => state.setPagination);
-    const addSearchTerm = useProductStore((state) => state.addSearchTerm);
-
-    return useQuery<PaginatedProductResponse, Error>({
-        queryKey: queryKeys.filtered({ ...filterRequest, cursor, pageSize }),
-        queryFn: async (): Promise<PaginatedProductResponse> => {
-            const data = await getFilteredProduct(filterRequest, cursor, pageSize);
-            setPagination(data.nextCursor, data.pageSize);
-
-            if (filterRequest.searchQuery) {
-                addSearchTerm(filterRequest.searchQuery, data.products);
-            }
-
             return data;
         },
         placeholderData: (previousData) => previousData

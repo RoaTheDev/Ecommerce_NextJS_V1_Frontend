@@ -72,7 +72,7 @@ export const me = async (): Promise<CurrentUserResponse> => {
     const response: AxiosResponse<CurrentUserResponse> = await authApi.get('/Auth/me');
     return response.data;
 };
-export const changePassword = async (id: string, data: PasswordChangeRequest): Promise<{ message: string }> => {
+export const changePassword = async (id: string | number, data: PasswordChangeRequest): Promise<{ message: string }> => {
     const response = await authApi.patch(`/Customer/${id}/password-change/`, data);
     return response.data;
 };

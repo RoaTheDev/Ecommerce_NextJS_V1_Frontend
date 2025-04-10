@@ -1,629 +1,610 @@
-// // src/components/product/ProductFilters.tsx
-// import React, {useEffect, useState} from 'react';
-// import {useRouter, useSearchParams} from 'next/navigation';
-// import {Input} from "@/components/ui/input";
-// import {Slider} from "@/components/ui/slider";
-// import {Button} from "@/components/ui/button";
-// import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-// import {Accordion, AccordionContent, AccordionItem, AccordionTrigger,} from "@/components/ui/accordion";
-// import {Badge} from "@/components/ui/badge";
-// import {Filter, Search, SlidersHorizontal, X} from "lucide-react";
-// // import {useCategories} from '@/lib/queries/useCategoryQueries';
-// // import {useTags} from '@/lib/queries/useTagQueries';
-// import {ProductFilterRequest, SortByEnum} from '@/lib/types/productTypes';
-//
-// interface ProductFiltersProps {
-//     initialFilters: ProductFilterRequest;
-//     onFilterChange: (filters: ProductFilterRequest) => void;
-//     onReset: () => void;
-//     appliedFilters: ProductFilterRequest;
-//     priceRange: { min: number; max: number };
-// }
-//
-// export function ProductFilters({
-//                                    initialFilters,
-//                                    onFilterChange,
-//                                    onReset,
-//                                    appliedFilters,
-//                                    priceRange
-//                                }: ProductFiltersProps) {
-//     const router = useRouter();
-//     const searchParams = useSearchParams();
-//     const {data: categories, isLoading: categoriesLoading} = useCategories();
-//     const {data: tags, isLoading: tagsLoading} = useTags();
-//
-//     const [filters, setFilters] = useState<ProductFilterRequest>(initialFilters);
-//     const [priceValues, setPriceValues] = useState<[number, number]>([
-//         filters.minPrice || priceRange.min,
-//         filters.maxPrice || priceRange.max
-//     ]);
-//     const [isOpen, setIsOpen] = useState(false);
-//     const [searchTerm, setSearchTerm] = useState(filters.searchQuery || '');
-//
-//     // Update filters when URL parameters change
-//     useEffect(() => {
-//         const categoryId = searchParams.get('categoryId');
-//         const minPrice = searchParams.get('minPrice');
-//         const maxPrice = searchParams.get('maxPrice');
-//         const inStock = searchParams.get('inStock');
-//         const sortBy = searchParams.get('sortBy');
-//         const search = searchParams.get('search');
-//         const tagIds = searchParams.getAll('tagIds');
-//
-//         const newFilters: ProductFilterRequest = {...initialFilters};
-//
-//         if (categoryId) newFilters.categoryId = parseInt(categoryId);
-//         if (minPrice) newFilters.minPrice = parseFloat(minPrice);
-//         if (maxPrice) newFilters.maxPrice = parseFloat(maxPrice);
-//         if (inStock) newFilters.inStock = inStock === 'true';
-//         if (sortBy) newFilters.sortBy = sortBy as SortByEnum;
-//         if (search) newFilters.searchQuery = search;
-//         if (tagIds.length > 0) newFilters.tagIds = tagIds.map(id => parseInt(id));
-//
-//         setFilters(newFilters);
-//         setPriceValues([
-//             newFilters.minPrice || priceRange.min,
-//             newFilters.maxPrice || priceRange.max
-//         ]);
-//         setSearchTerm(newFilters.searchQuery || '');
-//     }, [searchParams, initialFilters, priceRange]);
-//
-//     const handleSearchSubmit = (e: React.FormEvent) => {
-//         e.preventDefault();
-//         updateFilters({searchQuery: searchTerm});
-//     };
-//
-//     const handleCategoryChange = (value: string) => {
-//         updateFilters({categoryId: value === "all" ? undefined : parseInt(value)});
-//     };
-//
-//     const handleSortChange = (value: string) => {
-//         updateFilters({sortBy: value as SortByEnum});
-//     };
-//
-//     const handleTagToggle = (tagId: number) => {
-//         const currentTagIds = filters.tagIds || [];
-//         const updatedTagIds = currentTagIds.includes(tagId)
-//             ? currentTagIds.filter(id => id !== tagId)
-//             : [...currentTagIds, tagId];
-//
-//         updateFilters({tagIds: updatedTagIds.length > 0 ? updatedTagIds : undefined});
-//     };
-//
-//     const handlePriceChange = (value: number[]) => {
-//         setPriceValues([value[0], value[1]]);
-//     };
-//
-//     const applyPriceFilter = () => {
-//         updateFilters({
-//             minPrice: priceValues[0],
-//             maxPrice: priceValues[1]
-//         });
-//     };
-//
-//     const handleInStockChange = (value: string) => {
-//         updateFilters({inStock: value === "all" ? undefined : value === "true"});
-//     };
-//
-//     const removeFilter = (filterKey: keyof ProductFilterRequest) => {
-//         const newFilters = {...filters};
-//         if (filterKey === 'tagIds') {
-//             newFilters.tagIds = undefined;
-//         } else {
-//             newFilters[filterKey] = undefined;
-//         }
-//         onFilterChange(newFilters);
-//     };
-//
-//     const updateFilters = (newValues: Partial<ProductFilterRequest>) => {
-//         const updatedFilters = {...filters, ...newValues};
-//         setFilters(updatedFilters);
-//         onFilterChange(updatedFilters);
-//     };
-//
-//     const getTagName = (tagId: number) => {
-//         return tags?.find(t => t.tagId === tagId)?.tagName || `Tag ${tagId}`;
-//     };
-//
-//     const getCategoryName = (categoryId?: number) => {
-//         if (!categoryId) return 'All Categories';
-//         return categories?.find(c => c.categoryId === categoryId)?.categoryName || `Category ${categoryId}`;
-//     };
-//
-//     const getSortByName = (sortBy?: SortByEnum) => {
-//         switch (sortBy) {
-//             case SortByEnum.bestSelling:
-//                 return 'Best Selling';
-//             case SortByEnum.latest:
-//                 return 'New Arrivals';
-//             case SortByEnum.minPrice:
-//                 return 'Price: Low to High';
-//             case SortByEnum.maxPrice:
-//                 return 'Price: High to Low';
-//             case SortByEnum.name:
-//                 return 'Name: A to Z';
-//             default:
-//                 return 'Featured';
-//         }
-//     };
-//
-//     const hasActiveFilters = () => {
-//         return !!(
-//             filters.categoryId ||
-//             filters.searchQuery ||
-//             filters.minPrice ||
-//             filters.maxPrice ||
-//             filters.inStock !== undefined ||
-//             (filters.tagIds && filters.tagIds.length > 0) ||
-//             filters.sortBy
-//         );
-//     };
-//
-//     // Mobile filter drawer
-//     const toggleMobileFilters = () => {
-//         setIsOpen(!isOpen);
-//     };
-//
-//     return (
-//         <>
-//             {/* Applied Filters Tags - Visible on all devices */}
-//             {hasActiveFilters() && (
-//                 <div className="flex flex-wrap gap-2 mt-4 mb-6">
-//                     {filters.searchQuery && (
-//                         <Badge
-//                             className="py-1.5 px-3 bg-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light))] rounded-full flex items-center gap-1.5">
-//                             Search: {filters.searchQuery}
-//                             <X
-//                                 size={14}
-//                                 className="ml-1 cursor-pointer"
-//                                 onClick={() => removeFilter('searchQuery')}
-//                             />
-//                         </Badge>
-//                     )}
-//
-//                     {filters.categoryId && (
-//                         <Badge
-//                             className="py-1.5 px-3 bg-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light))] rounded-full flex items-center gap-1.5">
-//                             Category: {getCategoryName(filters.categoryId)}
-//                             <X
-//                                 size={14}
-//                                 className="ml-1 cursor-pointer"
-//                                 onClick={() => removeFilter('categoryId')}
-//                             />
-//                         </Badge>
-//                     )}
-//
-//                     {(filters.minPrice || filters.maxPrice) && (
-//                         <Badge
-//                             className="py-1.5 px-3 bg-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light))] rounded-full flex items-center gap-1.5">
-//                             Price: ${filters.minPrice || 0} - ${filters.maxPrice || '∞'}
-//                             <X
-//                                 size={14}
-//                                 className="ml-1 cursor-pointer"
-//                                 onClick={() => {
-//                                     removeFilter('minPrice');
-//                                     removeFilter('maxPrice');
-//                                 }}
-//                             />
-//                         </Badge>
-//                     )}
-//
-//                     {filters.inStock !== undefined && (
-//                         <Badge
-//                             className="py-1.5 px-3 bg-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light))] rounded-full flex items-center gap-1.5">
-//                             {filters.inStock ? 'In Stock Only' : 'Include Out of Stock'}
-//                             <X
-//                                 size={14}
-//                                 className="ml-1 cursor-pointer"
-//                                 onClick={() => removeFilter('inStock')}
-//                             />
-//                         </Badge>
-//                     )}
-//
-//                     {filters.sortBy && (
-//                         <Badge
-//                             className="py-1.5 px-3 bg-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light))] rounded-full flex items-center gap-1.5">
-//                             Sort: {getSortByName(filters.sortBy)}
-//                             <X
-//                                 size={14}
-//                                 className="ml-1 cursor-pointer"
-//                                 onClick={() => removeFilter('sortBy')}
-//                             />
-//                         </Badge>
-//                     )}
-//
-//                     {filters.tagIds && filters.tagIds.map((tagId) => (
-//                         <Badge
-//                             key={tagId}
-//                             className="py-1.5 px-3 bg-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light))] rounded-full flex items-center gap-1.5"
-//                         >
-//                             {getTagName(tagId)}
-//                             <X
-//                                 size={14}
-//                                 className="ml-1 cursor-pointer"
-//                                 onClick={() => handleTagToggle(tagId)}
-//                             />
-//                         </Badge>
-//                     ))}
-//
-//                     <Button
-//                         variant="ghost"
-//                         className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:bg-transparent p-0 h-auto"
-//                         onClick={onReset}
-//                     >
-//                         Clear All
-//                     </Button>
-//                 </div>
-//             )}
-//
-//             {/* Search Bar and Sort - Desktop */}
-//             <div className="hidden md:flex justify-between items-center mb-6">
-//                 <div className="w-1/3">
-//                     <form onSubmit={handleSearchSubmit} className="relative">
-//                         <Input
-//                             type="text"
-//                             placeholder="Search products..."
-//                             value={searchTerm}
-//                             onChange={(e) => setSearchTerm(e.target.value)}
-//                             className="pl-9 bg-white border-[hsl(var(--fauna-light))] focus-visible:ring-[hsl(var(--fauna-primary))]"
-//                         />
-//                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[hsl(var(--fauna-secondary))]"/>
-//                         <Button
-//                             type="submit"
-//                             className="absolute right-0 top-0 h-full rounded-l-none bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))]"
-//                         >
-//                             Search
-//                         </Button>
-//                     </form>
-//                 </div>
-//
-//                 <div className="flex items-center gap-4">
-//                     <Select
-//                         value={filters.sortBy?.toString() || ""}
-//                         onValueChange={handleSortChange}
-//                     >
-//                         <SelectTrigger className="w-44 bg-white border-[hsl(var(--fauna-light))]">
-//                             <SelectValue placeholder="Sort by"/>
-//                         </SelectTrigger>
-//                         <SelectContent>
-//                             <SelectItem value="">Featured</SelectItem>
-//                             <SelectItem value={SortByEnum.BestSelling}>Best Selling</SelectItem>
-//                             <SelectItem value={SortByEnum.Latest}>New Arrivals</SelectItem>
-//                             <SelectItem value={SortByEnum.MinPrice}>Price: Low to High</SelectItem>
-//                             <SelectItem value={SortByEnum.MaxPrice}>Price: High to Low</SelectItem>
-//                             <SelectItem value={SortByEnum.Name}>Name: A to Z</SelectItem>
-//                         </SelectContent>
-//                     </Select>
-//                 </div>
-//             </div>
-//
-//             {/* Mobile Search, Sort and Filter Toggle */}
-//             <div className="md:hidden mb-6">
-//                 <form onSubmit={handleSearchSubmit} className="relative mb-4">
-//                     <Input
-//                         type="text"
-//                         placeholder="Search products..."
-//                         value={searchTerm}
-//                         onChange={(e) => setSearchTerm(e.target.value)}
-//                         className="pl-9 bg-white border-[hsl(var(--fauna-light))] focus-visible:ring-[hsl(var(--fauna-primary))]"
-//                     />
-//                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-[hsl(var(--fauna-secondary))]"/>
-//                     <Button
-//                         type="submit"
-//                         className="absolute right-0 top-0 h-full rounded-l-none bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))]"
-//                     >
-//                         Search
-//                     </Button>
-//                 </form>
-//
-//                 <div className="flex gap-2">
-//                     <Button
-//                         variant="outline"
-//                         className="flex-1 border-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-secondary))]"
-//                         onClick={toggleMobileFilters}
-//                     >
-//                         <Filter className="mr-2 h-4 w-4"/>
-//                         Filter
-//                     </Button>
-//
-//                     <Select
-//                         value={filters.sortBy?.toString() || ""}
-//                         onValueChange={handleSortChange}
-//                     >
-//                         <SelectTrigger className="flex-1 bg-white border-[hsl(var(--fauna-light))]">
-//                             <SlidersHorizontal className="mr-2 h-4 w-4"/>
-//                             <span className="truncate">Sort</span>
-//                         </SelectTrigger>
-//                         <SelectContent>
-//                             <SelectItem value="">Featured</SelectItem>
-//                             <SelectItem value={SortByEnum.BestSelling}>Best Selling</SelectItem>
-//                             <SelectItem value={SortByEnum.Latest}>New Arrivals</SelectItem>
-//                             <SelectItem value={SortByEnum.MinPrice}>Price: Low to High</SelectItem>
-//                             <SelectItem value={SortByEnum.MaxPrice}>Price: High to Low</SelectItem>
-//                             <SelectItem value={SortByEnum.Name}>Name: A to Z</SelectItem>
-//                         </SelectContent>
-//                     </Select>
-//                 </div>
-//             </div>
-//
-//             {/* Filter Panel - Desktop */}
-//             <div className="hidden md:flex">
-//                 <div className="w-1/4 pr-6">
-//                     <div className="bg-white rounded-lg p-4 shadow-sm border border-[hsl(var(--fauna-light)/20%)]">
-//                         <h3 className="font-semibold text-xl mb-4 text-[hsl(var(--fauna-deep))]">Filters</h3>
-//
-//                         <Accordion type="single" collapsible className="w-full">
-//                             <AccordionItem value="categories" className="border-b border-[hsl(var(--fauna-light)/30%)]">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Categories
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="flex flex-col gap-2">
-//                                         <div
-//                                             className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${!filters.categoryId ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                             onClick={() => handleCategoryChange("all")}
-//                                         >
-//                                             All Categories
-//                                         </div>
-//                                         {!categoriesLoading && categories?.map((category) => (
-//                                             <div
-//                                                 key={category.categoryId}
-//                                                 className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${filters.categoryId === category.categoryId ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                                 onClick={() => handleCategoryChange(category.categoryId.toString())}
-//                                             >
-//                                                 {category.categoryName}
-//                                             </div>
-//                                         ))}
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//
-//                             <AccordionItem value="price" className="border-b border-[hsl(var(--fauna-light)/30%)]">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Price Range
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="px-2">
-//                                         <div className="mb-6">
-//                                             <Slider
-//                                                 defaultValue={[priceRange.min, priceRange.max]}
-//                                                 min={priceRange.min}
-//                                                 max={priceRange.max}
-//                                                 step={1}
-//                                                 value={priceValues}
-//                                                 onValueChange={handlePriceChange}
-//                                                 className="pt-6"
-//                                             />
-//                                         </div>
-//                                         <div className="flex justify-between mb-4 text-sm">
-//                                             <span>${priceValues[0]}</span>
-//                                             <span>${priceValues[1]}</span>
-//                                         </div>
-//                                         <Button
-//                                             onClick={applyPriceFilter}
-//                                             className="w-full bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))]"
-//                                         >
-//                                             Apply
-//                                         </Button>
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//
-//                             <AccordionItem value="availability"
-//                                            className="border-b border-[hsl(var(--fauna-light)/30%)]">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Availability
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="flex flex-col gap-2">
-//                                         <div
-//                                             className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${filters.inStock === undefined ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                             onClick={() => handleInStockChange("all")}
-//                                         >
-//                                             All Products
-//                                         </div>
-//                                         <div
-//                                             className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${filters.inStock === true ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                             onClick={() => handleInStockChange("true")}
-//                                         >
-//                                             In Stock Only
-//                                         </div>
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//
-//                             <AccordionItem value="tags" className="border-b-0">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Tags
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="flex flex-wrap gap-2">
-//                                         {!tagsLoading && tags?.map((tag) => (
-//                                             <Badge
-//                                                 key={tag.tagId}
-//                                                 variant="outline"
-//                                                 className={`cursor-pointer border px-2 py-1 ${
-//                                                     filters.tagIds?.includes(tag.tagId)
-//                                                         ? 'bg-[hsl(var(--fauna-light))] border-[hsl(var(--fauna-primary))] text-[hsl(var(--fauna-deep))]'
-//                                                         : 'bg-white hover:bg-[hsl(var(--fauna-light)/20%)] border-[hsl(var(--fauna-light))]'
-//                                                 }`}
-//                                                 onClick={() => handleTagToggle(tag.tagId)}
-//                                             >
-//                                                 {tag.tagName}
-//                                             </Badge>
-//                                         ))}
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//                         </Accordion>
-//
-//                         {hasActiveFilters() && (
-//                             <Button
-//                                 variant="outline"
-//                                 onClick={onReset}
-//                                 className="w-full mt-4 border-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light)/20%)]"
-//                             >
-//                                 Clear All Filters
-//                             </Button>
-//                         )}
-//                     </div>
-//                 </div>
-//             </div>
-//
-//             {/* Mobile Filter Panel (Drawer) */}
-//             <div
-//                 className={`md:hidden fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-//                 <div
-//                     className={`absolute right-0 top-0 h-full w-4/5 max-w-md bg-white transform transition-transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} overflow-y-auto`}>
-//                     <div className="p-4 border-b border-[hsl(var(--fauna-light)/30%)]">
-//                         <div className="flex justify-between items-center">
-//                             <h3 className="font-semibold text-xl text-[hsl(var(--fauna-deep))]">Filters</h3>
-//                             <Button variant="ghost" size="sm" onClick={toggleMobileFilters}>
-//                                 <X size={20}/>
-//                             </Button>
-//                         </div>
-//                     </div>
-//
-//                     <div className="p-4">
-//                         <Accordion type="single" collapsible className="w-full">
-//                             <AccordionItem value="categories" className="border-b border-[hsl(var(--fauna-light)/30%)]">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Categories
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="flex flex-col gap-2">
-//                                         <div
-//                                             className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${!filters.categoryId ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                             onClick={() => handleCategoryChange("all")}
-//                                         >
-//                                             All Categories
-//                                         </div>
-//                                         {!categoriesLoading && categories?.map((category) => (
-//                                             <div
-//                                                 key={category.categoryId}
-//                                                 className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${filters.categoryId === category.categoryId ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                                 onClick={() => handleCategoryChange(category.categoryId.toString())}
-//                                             >
-//                                                 {category.categoryName}
-//                                             </div>
-//                                         ))}
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//
-//                             <AccordionItem value="price" className="border-b border-[hsl(var(--fauna-light)/30%)]">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Price Range
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="px-2">
-//                                         <div className="mb-6">
-//                                             <Slider
-//                                                 defaultValue={[priceRange.min, priceRange.max]}
-//                                                 min={priceRange.min}
-//                                                 max={priceRange.max}
-//                                                 step={1}
-//                                                 value={priceValues}
-//                                                 onValueChange={handlePriceChange}
-//                                                 className="pt-6"
-//                                             />
-//                                         </div>
-//                                         <div className="flex justify-between mb-4 text-sm">
-//                                             <span>${priceValues[0]}</span>
-//                                             <span>${priceValues[1]}</span>
-//                                         </div>
-//                                         <Button
-//                                             onClick={() => {
-//                                                 applyPriceFilter();
-//                                                 toggleMobileFilters();
-//                                             }}
-//                                             className="w-full bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))]"
-//                                         >
-//                                             Apply
-//                                         </Button>
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//
-//                             <AccordionItem value="availability"
-//                                            className="border-b border-[hsl(var(--fauna-light)/30%)]">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Availability
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="flex flex-col gap-2">
-//                                         <div
-//                                             className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${filters.inStock === undefined ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                             onClick={() => handleInStockChange("all")}
-//                                         >
-//                                             All Products
-//                                         </div>
-//                                         <div
-//                                             className={`cursor-pointer px-2 py-1 rounded hover:bg-[hsl(var(--fauna-light)/20%)] ${filters.inStock === true ? 'bg-[hsl(var(--fauna-light)/20%)] font-medium text-[hsl(var(--fauna-deep))]' : ''}`}
-//                                             onClick={() => handleInStockChange("true")}
-//                                         >
-//                                             In Stock Only
-//                                         </div>
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//
-//                             <AccordionItem value="tags" className="border-b-0">
-//                                 <AccordionTrigger
-//                                     className="text-[hsl(var(--fauna-secondary))] hover:text-[hsl(var(--fauna-deep))] hover:no-underline py-3">
-//                                     Tags
-//                                 </AccordionTrigger>
-//                                 <AccordionContent>
-//                                     <div className="flex flex-wrap gap-2">
-//                                         {!tagsLoading && tags?.map((tag) => (
-//                                             <Badge
-//                                                 key={tag.tagId}
-//                                                 variant="outline"
-//                                                 className={`cursor-pointer border px-2 py-1 ${
-//                                                     filters.tagIds?.includes(tag.tagId)
-//                                                         ? 'bg-[hsl(var(--fauna-light))] border-[hsl(var(--fauna-primary))] text-[hsl(var(--fauna-deep))]'
-//                                                         : 'bg-white hover:bg-[hsl(var(--fauna-light)/20%)] border-[hsl(var(--fauna-light))]'
-//                                                 }`}
-//                                                 onClick={() => handleTagToggle(tag.tagId)}
-//                                             >
-//                                                 {tag.tagName}
-//                                             </Badge>
-//                                         ))}
-//                                     </div>
-//                                 </AccordionContent>
-//                             </AccordionItem>
-//                         </Accordion>
-//                     </div>
-//
-//                     <div className="p-4 border-t border-[hsl(var(--fauna-light)/30%)] sticky bottom-0 bg-white">
-//                         <div className="flex gap-2">
-//                             <Button
-//                                 variant="outline"
-//                                 onClick={() => {
-//                                     onReset();
-//                                     toggleMobileFilters();
-//                                 }}
-//                                 className="flex-1 border-[hsl(var(--fauna-light))] text-[hsl(var(--fauna-secondary))] hover:bg-[hsl(var(--fauna-light)/20%)]"
-//                             >
-//                                 Clear All
-//                             </Button>
-//                             <Button
-//                                 onClick={toggleMobileFilters}
-//                                 className="flex-1 bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))]"
-//                             >
-//                                 Apply Filters
-//                             </Button>
-//                         </div>
-//                     </div>
-//                 </div>
-//             </div>
-//         </>
-//     );
-// }
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { useAllCategories } from '@/lib/queries/useCategoryQueries';
+import { useAllTags } from '@/lib/queries/useTagQueries';
+import { ProductFilterRequest, SortByEnum } from '@/lib/types/productTypes';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Form, FormControl, FormField, FormItem, FormLabel } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Slider } from '@/components/ui/slider';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { AllTagResponse } from '@/lib/types/tagTypes';
+import { PaginatedCategoryResponse } from '@/lib/types/categoryTypes';
+
+export type AllTagsResponse = AllTagResponse[];
+
+const filterFormSchema = z.object({
+    searchQuery: z.string().optional(),
+    categoryId: z.number().optional().nullable(),
+    tagIds: z.array(z.number()).optional().nullable(),
+    minPrice: z.number().min(0).optional().nullable(),
+    maxPrice: z.number().min(0).optional().nullable(),
+    inStock: z.boolean().optional().nullable(),
+    sortBy: z.nativeEnum(SortByEnum).optional().nullable(),
+});
+
+type FilterFormValues = z.infer<typeof filterFormSchema>;
+
+interface ProductFilterProps {
+    onFilterChangeAction: (filter: ProductFilterRequest) => Promise<void>;
+    initialFilter?: ProductFilterRequest;
+}
+
+export default function ProductFilter({ onFilterChangeAction, initialFilter }: ProductFilterProps) {
+    const [isOpen, setIsOpen] = useState(false);
+    const [priceRange, setPriceRange] = useState<[number, number]>([
+        initialFilter?.minPrice ?? 0,
+        initialFilter?.maxPrice ?? 1000,
+    ]);
+    const [appliedFilters, setAppliedFilters] = useState<string[]>([]);
+
+    const { data: categoriesData } = useAllCategories({ cursor: 0, pageSize: 100 });
+    const { data: tagsData } = useAllTags({ cursor: 0, pageSize: 100 });
+
+    // Safely extract categories and tags with fallbacks
+    const categories = categoriesData as PaginatedCategoryResponse | undefined;
+    const tags = tagsData as AllTagsResponse | undefined;
+
+    const form = useForm<FilterFormValues>({
+        resolver: zodResolver(filterFormSchema),
+        defaultValues: {
+            searchQuery: initialFilter?.searchQuery || '',
+            categoryId: initialFilter?.categoryId || null,
+            tagIds: initialFilter?.tagIds || [],
+            minPrice: initialFilter?.minPrice ?? 0,
+            maxPrice: initialFilter?.maxPrice ?? 1000,
+            inStock: initialFilter?.inStock ?? null,
+            sortBy: initialFilter?.sortBy || SortByEnum.Latest,
+        },
+    });
+
+    const watchMinPrice = form.watch('minPrice');
+    const watchMaxPrice = form.watch('maxPrice');
+
+    useEffect(() => {
+        const minPrice = watchMinPrice ?? 0;
+        const maxPrice = watchMaxPrice ?? 1000;
+        setPriceRange([minPrice, maxPrice]);
+    }, [watchMinPrice, watchMaxPrice]);
+
+    const watchSearchQuery = form.watch('searchQuery');
+    const watchCategoryId = form.watch('categoryId');
+    const watchTagIds = form.watch('tagIds');
+    const watchInStock = form.watch('inStock');
+    const watchSortBy = form.watch('sortBy');
+
+    useEffect(() => {
+        const newAppliedFilters: string[] = [];
+
+        if (watchSearchQuery) newAppliedFilters.push(`Search: ${watchSearchQuery}`);
+        if (watchCategoryId && categories?.categories) {
+            const category = categories.categories.find((c) => c.categoryId === watchCategoryId);
+            if (category) newAppliedFilters.push(`Category: ${category.categoryName}`);
+        }
+        if (watchTagIds && tags) {
+            (watchTagIds ?? []).forEach((tagId) => {
+                const tag = tags.find((t) => t.tagId === tagId);
+                if (tag) newAppliedFilters.push(`Tag: ${tag.tagName}`);
+            });
+        }
+        const minPrice = watchMinPrice;
+        const maxPrice = watchMaxPrice;
+        if (minPrice || maxPrice) newAppliedFilters.push(`Price: $${minPrice ?? 0} - $${maxPrice ?? '∞'}`);
+        if (watchInStock !== null) newAppliedFilters.push(`Stock: ${watchInStock ? 'In Stock' : 'All Items'}`);
+        if (watchSortBy && watchSortBy !== SortByEnum.None) {
+            const sortMap: Record<SortByEnum, string> = {
+                [SortByEnum.Latest]: 'Newest First',
+                [SortByEnum.MinPrice]: 'Price: Low to High',
+                [SortByEnum.MaxPrice]: 'Price: High to Low',
+                [SortByEnum.BestSelling]: 'Best Selling',
+                [SortByEnum.Name]: 'Name (A-Z)',
+                [SortByEnum.Date]: 'Date Added',
+                [SortByEnum.None]: '',
+            };
+            newAppliedFilters.push(`Sort: ${sortMap[watchSortBy]}`);
+        }
+
+        setAppliedFilters(newAppliedFilters);
+    }, [watchSearchQuery, watchCategoryId, watchTagIds, watchMinPrice, watchMaxPrice, watchInStock, watchSortBy, categories, tags]);
+
+    const onSubmit = async (values: FilterFormValues) => {
+        const filter: ProductFilterRequest = {
+            searchQuery: values.searchQuery || undefined,
+            categoryId: values.categoryId || undefined,
+            tagIds: values.tagIds?.length ? values.tagIds : undefined,
+            minPrice: values.minPrice ?? undefined,
+            maxPrice: values.maxPrice ?? undefined,
+            inStock: values.inStock ?? undefined,
+            sortBy: values.sortBy || undefined,
+        };
+        await onFilterChangeAction(filter);
+        setIsOpen(false);
+    };
+
+    const handleResetFilters = async () => {
+        form.reset({
+            searchQuery: '',
+            categoryId: null,
+            tagIds: [],
+            minPrice: 0,
+            maxPrice: 1000,
+            inStock: null,
+            sortBy: SortByEnum.Latest,
+        });
+        setPriceRange([0, 1000]);
+        await onFilterChangeAction({ sortBy: SortByEnum.Latest });
+    };
+
+    const handleRemoveFilter = async (filter: string) => {
+        if (filter.startsWith('Search:')) form.setValue('searchQuery', '');
+        else if (filter.startsWith('Category:')) form.setValue('categoryId', null);
+        else if (filter.startsWith('Tag:') && tags) {
+            const tagName = filter.replace('Tag: ', '');
+            const tag = tags.find((t) => t.tagName === tagName);
+            if (tag) {
+                const currentTags = form.getValues('tagIds') ?? [];
+                form.setValue('tagIds', currentTags.filter((id) => id !== tag.tagId));
+            }
+        } else if (filter.startsWith('Price:')) {
+            form.setValue('minPrice', 0);
+            form.setValue('maxPrice', 1000);
+            setPriceRange([0, 1000]);
+        } else if (filter.startsWith('Stock:')) form.setValue('inStock', null);
+        else if (filter.startsWith('Sort:')) form.setValue('sortBy', SortByEnum.Latest);
+        await form.handleSubmit(onSubmit)();
+    };
+
+    return (
+        <div>
+            {/* Desktop filter panel */}
+            <div className="hidden md:block mb-8 bg-[hsl(var(--fauna-background))]">
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <div className="flex flex-wrap gap-4">
+                            <div className="flex-1 min-w-[280px]">
+                                <FormField
+                                    control={form.control}
+                                    name="searchQuery"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <div className="relative">
+                                                <FormControl>
+                                                    <Input
+                                                        placeholder="Search products..."
+                                                        className="pl-10 h-10 border-[hsl(var(--fauna-light)/50%)] focus:border-[hsl(var(--fauna-primary))] bg-white"
+                                                        {...field}
+                                                    />
+                                                </FormControl>
+                                                <Search
+                                                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[hsl(var(--fauna-secondary))]"
+                                                    size={18}
+                                                />
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <div className="w-full sm:w-auto">
+                                <FormField
+                                    control={form.control}
+                                    name="categoryId"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <Select
+                                                value={field.value?.toString() || ''}
+                                                onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                                            >
+                                                <SelectTrigger className="w-[200px] h-10 border-[hsl(var(--fauna-light)/50%)] focus:border-[hsl(var(--fauna-primary))] bg-white">
+                                                    <SelectValue placeholder="Select category" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="all">All categories</SelectItem>
+                                                    {categories?.categories?.map((category) => (
+                                                        <SelectItem key={category.categoryId} value={category.categoryId.toString()}>
+                                                            {category.categoryName}
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <div className="w-full sm:w-auto">
+                                <FormField
+                                    control={form.control}
+                                    name="sortBy"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <Select
+                                                value={field.value || ''}
+                                                onValueChange={(value) => field.onChange(value as SortByEnum || null)}
+                                            >
+                                                <SelectTrigger className="w-[200px] h-10 border-[hsl(var(--fauna-light)/50%)] focus:border-[hsl(var(--fauna-primary))] bg-white">
+                                                    <SelectValue placeholder="Sort by" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value={SortByEnum.Latest}>Newest First</SelectItem>
+                                                    <SelectItem value={SortByEnum.BestSelling}>Best Selling</SelectItem>
+                                                    <SelectItem value={SortByEnum.MinPrice}>Price: Low to High</SelectItem>
+                                                    <SelectItem value={SortByEnum.MaxPrice}>Price: High to Low</SelectItem>
+                                                    <SelectItem value={SortByEnum.Name}>Name (A-Z)</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </FormItem>
+                                    )}
+                                />
+                            </div>
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="h-10 border-[hsl(var(--fauna-light)/50%)] bg-white text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light)/20%)] hover:text-[hsl(var(--fauna-deep))]"
+                                    >
+                                        <SlidersHorizontal size={18} className="mr-2" /> More Filters
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80">
+                                    <div className="space-y-4 p-2">
+                                        <div className="space-y-2">
+                                            <h4 className="font-medium text-[hsl(var(--fauna-deep))]">Price Range</h4>
+                                            <div className="pt-4 px-2">
+                                                <Slider
+                                                    value={priceRange}
+                                                    min={0}
+                                                    max={1000}
+                                                    step={10}
+                                                    onValueChange={(values) => {
+                                                        setPriceRange(values as [number, number]);
+                                                        form.setValue('minPrice', values[0]);
+                                                        form.setValue('maxPrice', values[1]);
+                                                    }}
+                                                    className="my-6"
+                                                />
+                                                <div className="flex justify-between mt-2">
+                                                    <div className="border rounded p-2 w-[45%] text-center bg-white">${priceRange[0]}</div>
+                                                    <div className="border rounded p-2 w-[45%] text-center bg-white">${priceRange[1]}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <h4 className="font-medium text-[hsl(var(--fauna-deep))]">Tags</h4>
+                                            <div className="max-h-40 overflow-y-auto pr-2">
+                                                {Array.isArray(tags) && tags.length > 0 ? (
+                                                    tags.map((tag) => (
+                                                        <div key={tag.tagId} className="flex items-center space-x-2 py-1">
+                                                            <FormField
+                                                                control={form.control}
+                                                                name="tagIds"
+                                                                render={({ field }) => (
+                                                                    <FormItem className="flex flex-row items-center space-x-2">
+                                                                        <FormControl>
+                                                                            <Checkbox
+                                                                                checked={(field.value ?? []).includes(tag.tagId)}
+                                                                                onCheckedChange={(checked) => {
+                                                                                    const currentTags = field.value ?? [];
+                                                                                    if (checked) {
+                                                                                        field.onChange([...currentTags, tag.tagId]);
+                                                                                    } else {
+                                                                                        field.onChange(currentTags.filter((id) => id !== tag.tagId));
+                                                                                    }
+                                                                                }}
+                                                                            />
+                                                                        </FormControl>
+                                                                        <FormLabel className="cursor-pointer text-[hsl(var(--fauna-secondary))]">{tag.tagName}</FormLabel>
+                                                                    </FormItem>
+                                                                )}
+                                                            />
+                                                        </div>
+                                                    ))
+                                                ) : (
+                                                    <p className="text-[hsl(var(--fauna-secondary))]">No tags available</p>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <FormField
+                                                control={form.control}
+                                                name="inStock"
+                                                render={({ field }) => (
+                                                    <FormItem className="flex flex-row items-center space-x-2">
+                                                        <FormControl>
+                                                            <Checkbox
+                                                                checked={field.value === true}
+                                                                onCheckedChange={(checked) => field.onChange(checked ? true : null)}
+                                                            />
+                                                        </FormControl>
+                                                        <FormLabel className="cursor-pointer text-[hsl(var(--fauna-secondary))]">In Stock Only</FormLabel>
+                                                    </FormItem>
+                                                )}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="flex justify-between mt-4">
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={() => {
+                                                form.setValue('minPrice', 0);
+                                                form.setValue('maxPrice', 1000);
+                                                form.setValue('tagIds', []);
+                                                form.setValue('inStock', null);
+                                                setPriceRange([0, 1000]);
+                                            }}
+                                            className="text-[hsl(var(--fauna-deep))]"
+                                        >
+                                            Clear
+                                        </Button>
+                                        <Button
+                                            type="submit"
+                                            onClick={() => form.handleSubmit(onSubmit)()}
+                                            className="bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))] text-white"
+                                        >
+                                            Apply
+                                        </Button>
+                                    </div>
+                                </PopoverContent>
+                            </Popover>
+                            <Button
+                                type="submit"
+                                className="bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))] text-white"
+                            >
+                                Search
+                            </Button>
+                            {appliedFilters.length > 0 && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={handleResetFilters}
+                                    className="border-[hsl(var(--fauna-light)/50%)] text-[hsl(var(--fauna-secondary))] hover:bg-[hsl(var(--fauna-light)/20%)]"
+                                >
+                                    Reset All
+                                </Button>
+                            )}
+                        </div>
+                    </form>
+                </Form>
+                {appliedFilters.length > 0 && (
+                    <div className="mt-4 flex flex-wrap gap-2">
+                        {appliedFilters.map((filter, index) => (
+                            <Badge
+                                key={index}
+                                className="bg-[hsl(var(--fauna-light)/30%)] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light)/40%)] px-3 py-1.5"
+                            >
+                                {filter}
+                                <X size={14} className="ml-1 cursor-pointer" onClick={() => handleRemoveFilter(filter)} />
+                            </Badge>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            {/* Mobile filter panel */}
+            <div className="md:hidden mb-6">
+                <div className="flex gap-2">
+                    <FormField
+                        control={form.control}
+                        name="searchQuery"
+                        render={({ field }) => (
+                            <FormItem className="flex-1">
+                                <div className="relative">
+                                    <FormControl>
+                                        <Input
+                                            placeholder="Search products..."
+                                            className="pl-10 h-10 border-[hsl(var(--fauna-light)/50%)] focus:border-[hsl(var(--fauna-primary))] bg-white"
+                                            {...field}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') form.handleSubmit(onSubmit)();
+                                            }}
+                                        />
+                                    </FormControl>
+                                    <Search
+                                        className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[hsl(var(--fauna-secondary))]"
+                                        size={18}
+                                    />
+                                </div>
+                            </FormItem>
+                        )}
+                    />
+                    <Sheet open={isOpen} onOpenChange={setIsOpen}>
+                        <SheetTrigger asChild>
+                            <Button
+                                variant="outline"
+                                className="border-[hsl(var(--fauna-light)/50%)] bg-white text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light)/20%)]"
+                            >
+                                <SlidersHorizontal size={18} />
+                            </Button>
+                        </SheetTrigger>
+                        <SheetContent className="w-[85vw] sm:max-w-md bg-[hsl(var(--fauna-background))]">
+                            <SheetHeader>
+                                <SheetTitle className="text-[hsl(var(--fauna-deep))] text-xl">Filters</SheetTitle>
+                            </SheetHeader>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+                                    <Accordion type="single" collapsible className="w-full">
+                                        <AccordionItem value="category" className="border-[hsl(var(--fauna-light)/50%)]">
+                                            <AccordionTrigger className="text-[hsl(var(--fauna-deep))]">Categories</AccordionTrigger>
+                                            <AccordionContent>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="categoryId"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <Select
+                                                                value={field.value?.toString() || ''}
+                                                                onValueChange={(value) => field.onChange(value ? parseInt(value) : null)}
+                                                            >
+                                                                <SelectTrigger className="w-full border-[hsl(var(--fauna-light)/50%)] focus:border-[hsl(var(--fauna-primary))] bg-white">
+                                                                    <SelectValue placeholder="Select category" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value="">All categories</SelectItem>
+                                                                    {categories?.categories?.map((category) => (
+                                                                        <SelectItem key={category.categoryId} value={category.categoryId.toString()}>
+                                                                            {category.categoryName}
+                                                                        </SelectItem>
+                                                                    ))}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="sort" className="border-[hsl(var(--fauna-light)/50%)]">
+                                            <AccordionTrigger className="text-[hsl(var(--fauna-deep))]">Sort By</AccordionTrigger>
+                                            <AccordionContent>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="sortBy"
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <Select
+                                                                value={field.value || ''}
+                                                                onValueChange={(value) => field.onChange(value as SortByEnum || null)}
+                                                            >
+                                                                <SelectTrigger className="w-full border-[hsl(var(--fauna-light)/50%)] focus:border-[hsl(var(--fauna-primary))] bg-white">
+                                                                    <SelectValue placeholder="Sort by" />
+                                                                </SelectTrigger>
+                                                                <SelectContent>
+                                                                    <SelectItem value={SortByEnum.Latest}>Newest First</SelectItem>
+                                                                    <SelectItem value={SortByEnum.BestSelling}>Best Selling</SelectItem>
+                                                                    <SelectItem value={SortByEnum.MinPrice}>Price: Low to High</SelectItem>
+                                                                    <SelectItem value={SortByEnum.MaxPrice}>Price: High to Low</SelectItem>
+                                                                    <SelectItem value={SortByEnum.Name}>Name (A-Z)</SelectItem>
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="price" className="border-[hsl(var(--fauna-light)/50%)]">
+                                            <AccordionTrigger className="text-[hsl(var(--fauna-deep))]">Price Range</AccordionTrigger>
+                                            <AccordionContent>
+                                                <div className="pt-4 px-2">
+                                                    <Slider
+                                                        value={priceRange}
+                                                        min={0}
+                                                        max={1000}
+                                                        step={10}
+                                                        onValueChange={(values) => {
+                                                            setPriceRange(values as [number, number]);
+                                                            form.setValue('minPrice', values[0]);
+                                                            form.setValue('maxPrice', values[1]);
+                                                        }}
+                                                        className="my-6"
+                                                    />
+                                                    <div className="flex justify-between mt-2">
+                                                        <div className="border rounded p-2 w-[45%] text-center bg-white">${priceRange[0]}</div>
+                                                        <div className="border rounded p-2 w-[45%] text-center bg-white">${priceRange[1]}</div>
+                                                    </div>
+                                                </div>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="tags" className="border-[hsl(var(--fauna-light)/50%)]">
+                                            <AccordionTrigger className="text-[hsl(var(--fauna-deep))]">Tags</AccordionTrigger>
+                                            <AccordionContent>
+                                                <div className="max-h-40 overflow-y-auto pr-2">
+                                                    {Array.isArray(tags) && tags.length > 0 ? (
+                                                        tags.map((tag) => (
+                                                            <div key={tag.tagId} className="flex items-center space-x-2 py-1">
+                                                                <FormField
+                                                                    control={form.control}
+                                                                    name="tagIds"
+                                                                    render={({ field }) => (
+                                                                        <FormItem className="flex flex-row items-center space-x-2">
+                                                                            <FormControl>
+                                                                                <Checkbox
+                                                                                    checked={(field.value ?? []).includes(tag.tagId)}
+                                                                                    onCheckedChange={(checked) => {
+                                                                                        const currentTags = field.value ?? [];
+                                                                                        if (checked) {
+                                                                                            field.onChange([...currentTags, tag.tagId]);
+                                                                                        } else {
+                                                                                            field.onChange(currentTags.filter((id) => id !== tag.tagId));
+                                                                                        }
+                                                                                    }}
+                                                                                />
+                                                                            </FormControl>
+                                                                            <FormLabel className="text-[hsl(var(--fauna-secondary))]">{tag.tagName}</FormLabel>
+                                                                        </FormItem>
+                                                                    )}
+                                                                />
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <p className="text-[hsl(var(--fauna-secondary))]">No tags available</p>
+                                                    )}
+                                                </div>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                        <AccordionItem value="availability" className="border-[hsl(var(--fauna-light)/50%)]">
+                                            <AccordionTrigger className="text-[hsl(var(--fauna-deep))]">Availability</AccordionTrigger>
+                                            <AccordionContent>
+                                                <FormField
+                                                    control={form.control}
+                                                    name="inStock"
+                                                    render={({ field }) => (
+                                                        <FormItem className="flex flex-row items-center space-x-2">
+                                                            <FormControl>
+                                                                <Checkbox
+                                                                    checked={field.value === true}
+                                                                    onCheckedChange={(checked) => field.onChange(checked ? true : null)}
+                                                                />
+                                                            </FormControl>
+                                                            <FormLabel className="text-[hsl(var(--fauna-secondary))]">In Stock Only</FormLabel>
+                                                        </FormItem>
+                                                    )}
+                                                />
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    </Accordion>
+                                    <div className="pt-4 space-y-2">
+                                        <Button
+                                            type="submit"
+                                            className="w-full bg-[hsl(var(--fauna-primary))] hover:bg-[hsl(var(--fauna-deep))] text-white"
+                                        >
+                                            Apply Filters
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={handleResetFilters}
+                                            className="w-full border-[hsl(var(--fauna-light)/50%)] text-[hsl(var(--fauna-secondary))] hover:bg-[hsl(var(--fauna-light)/20%)]"
+                                        >
+                                            Reset All
+                                        </Button>
+                                    </div>
+                                </form>
+                            </Form>
+                        </SheetContent>
+                    </Sheet>
+                </div>
+                {appliedFilters.length > 0 && (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                        {appliedFilters.map((filter, index) => (
+                            <Badge
+                                key={index}
+                                className="bg-[hsl(var(--fauna-light)/30%)] text-[hsl(var(--fauna-deep))] hover:bg-[hsl(var(--fauna-light)/40%)] px-2 py-1 text-xs"
+                            >
+                                {filter}
+                                <X size={10} className="ml-1 cursor-pointer" onClick={() => handleRemoveFilter(filter)} />
+                            </Badge>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}

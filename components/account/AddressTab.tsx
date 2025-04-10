@@ -41,8 +41,11 @@ export const AddressTab: React.FC = () => {
             return a.city.localeCompare(b.city);
         });
     };
+    let customerId: number = 0
 
-    const customerId = currentUser?.id ? parseInt(currentUser.id) : 0;
+    if (typeof currentUser?.id === "string") {
+        customerId = currentUser?.id ? parseInt(currentUser.id) : 0;
+    }
 
     const {
         addresses,
